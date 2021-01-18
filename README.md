@@ -9,10 +9,13 @@ Cityvilleburg is an addon for Blender.
   
     pip install fake-bpy-module-<Blender version>
 
-- There may be other ways to do this, but if Blender does
-not seem to be affected by your changes, then it may be 
-necessary to <code>touch</code> the root \_\_init\_\_.py file to test
-the addon.
+- If clicking *Refresh* on the Add-ons tab of Blender 
+does not seem to refresh your changes, then it may be 
+necessary to force Blender to reload the add-ons. In the
+Blender Python Console, run:
+  
+
+    bpy.ops.script.reload()
 
 ## License
 
