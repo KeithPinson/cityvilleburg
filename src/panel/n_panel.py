@@ -5,6 +5,7 @@
 
 import bpy
 from bpy.types import Panel, Operator
+from .. utils import icons
 #from ... preferences import get_preferences
 
 
@@ -33,9 +34,8 @@ class CVB_PT_PanelFrame(Panel):
     def draw(self, context):
         self.layout.operator("object.new_map", icon='PLUS', text="New Map")
 
-        self.layout.operator()
+        self.layout.operator("object.new_map", text="New Map", icon_value=get_icon_id("icon-new-map-l"))
 
-# box.operator("hops.sharpen", text="Sharpen", icon_value=get_icon_id("Ssharpen"))
 
 class CVB_OT_PanelMapSegment(bpy.types.Operator):
     bl_idname = 'object.new_map'
