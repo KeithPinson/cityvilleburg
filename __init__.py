@@ -19,7 +19,6 @@ from .src.addon.preferences import CVB_AddonPreferences
 from .src.panel.n_panel import CVB_OT_PanelMapSegment
 from .src.panel.n_panel import CVB_PT_PanelFrame
 
-__CVB_DEBUG__ = True
 
 bl_info = {
     "name": "CITYVILLEBURG",
@@ -35,8 +34,8 @@ bl_info = {
     "tracker_url": "https://github.com/KeithPinson/cityvilleburg/issues"
 }
 
-if __CVB_DEBUG__:
-    print("\n", f'''*** {bl_info['name']} ***''')
+# Make it clear where the output on the console for this addon begins
+print("\n", f'''*** {bl_info['name']} ***''')
 
 # Ideally we should declare and define the hooks for the Blender
 # classes in their respective packages, but because of the ease at
@@ -44,9 +43,9 @@ if __CVB_DEBUG__:
 # and then try to perform a simple verification test of class existence.
 
 CLASS_REGISTRY = (
+    CVB_AddonPreferences,  # We treat this class a special case (keep it at the top)
     CVB_OT_PanelMapSegment,
     CVB_PT_PanelFrame,
-    CVB_AddonPreferences,
 )
 
 
@@ -61,30 +60,29 @@ def verify_classes(registry):
     return all_verified
 
 
-if __CVB_DEBUG__:
-    verify_classes(CLASS_REGISTRY)
-
-cvb_icons = None
-cvb_thumbnails = None
+classes_verified = verify_classes(CLASS_REGISTRY)
 
 
 def register():
-    global cvb_icons
-    cvb_icons = IconCollection()
+
+    # We treat the addon preferences class as our root class
+    register_class(CVB_AddonPreferences)
+
+    CVB_AddonPreferences.cvb_icons = IconCollection()
 
     for cls in CLASS_REGISTRY:
-        register_class(cls)
+        if cls is not CVB_AddonPreferences:
+            register_class(cls)
 
 
 def unregister():
-    global cvb_icons
+
+    if CVB_AddonPreferences.cvb_icons is not None:
+        del CVB_AddonPreferences.cvb_icons
 
     for cls in reversed(CLASS_REGISTRY):
         unregister_class(cls)
 
-    if cvb_icons is not None:
-        del cvb_icons
 
-
-if __name__ == "__main__":
+if classes_verified and __name__ == "__main__":
     register()

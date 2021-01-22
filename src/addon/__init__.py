@@ -4,3 +4,6 @@
 # folder is concerned with the business of what goes on in that page
 # and nothing more.
 #
+# Copyright (c) 2021 Keith Pinson
+
+from . import preferences

@@ -6,7 +6,7 @@
 import bpy
 from bpy.types import Panel, Operator
 from .. utils import icons
-#from ... preferences import get_preferences
+from ..addon.preferences import cvb_icon
 
 
 # class panel_frame(Panel):
@@ -32,24 +32,17 @@ class CVB_PT_PanelFrame(Panel):
     bl_category = 'CVB'
 
     def draw(self, context):
-        self.layout.operator("object.new_map", icon='PLUS', text="New Map")
+        self.layout.operator("object.new_map",
+                             text="New Map",
+                             icon_value=cvb_icon(context, "icon-new-map-l"))
 
-        self.layout.operator("object.new_map", text="New Map", icon_value=get_icon_id("icon-new-map-l"))
 
-
-class CVB_OT_PanelMapSegment(bpy.types.Operator):
+class CVB_OT_PanelMapSegment(Operator):
     bl_idname = 'object.new_map'
     bl_label = 'New Map'
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
         bpy.ops.mesh.primitive_cube_add()
-
-        # print( " *** ")
-        # print( *(context.preferences.addons), sep="\n" )
-        # print( " *** ")
-
-        # if context.preferences.addons['cityvilleburg'].preferences.add_bevel == 'bevel':
-        #     bpy.ops.object.modifier_add(type='BEVEL')
 
         return {"FINISHED"}
