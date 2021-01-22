@@ -2,6 +2,14 @@
 
 Cityvilleburg is an addon for Blender.
 
+## Geographic Coordinate System
+
+We don't use one. No latitude. No longitude. 
+This is not a mapping tool. What we use is the
+default Blender coordinate system where zero; x, y, and z,
+marks the center of everything and an offset of
+1 is equivalent to 1 meter.
+
 ## Development Notes
 
 - For Blender auto-completions in an IDE, use [fake-bpy-module](https://github.com/nutti/fake-bpy-module) to sidestep the need to install Blender as a Python module.
