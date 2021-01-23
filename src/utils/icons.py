@@ -21,7 +21,12 @@ class IconCollection:
             bpy.utils.previews.remove(self.icons_collection)
 
     def get_icon_id(self, name):
-        return self.get_icon(name).icon_id
+        found_icon = self.get_icon(name)
+
+        if found_icon.icon_size[0] == 0:
+            print("Icon file not found: ", name)
+
+        return found_icon.icon_id
 
     def get_icon(self, name):
         if name in self.icons_collection:
