@@ -16,8 +16,8 @@ from inspect import isclass
 from .src.utils.icons import IconCollection
 # from .src.utils.thumbnails import ThumbnailCollection
 from .src.addon.preferences import CVB_AddonPreferences
-from .src.panel.n_panel import CVB_OT_PanelMapSegment
-from .src.panel.n_panel import CVB_PT_PanelFrame
+from .src.panel.n_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
+from .src.panel.n_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
 
 
 bl_info = {
@@ -44,8 +44,11 @@ print("\n", f'''*** {bl_info['name']} ***''')
 
 CLASS_REGISTRY = (
     CVB_AddonPreferences,  # We treat this class a special case (keep it at the top)
-    CVB_OT_PanelMapSegment,
-    CVB_PT_PanelFrame,
+    CVB_OT_NewMap,
+    CVB_OT_GenCity,
+    CVB_OT_GettingStartedHelp,
+    CVB_PT_Main,
+    CVB_PT_Help,
 )
 
 
