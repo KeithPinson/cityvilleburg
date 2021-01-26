@@ -13,8 +13,7 @@
 import bpy
 from bpy.utils import register_class, unregister_class
 from inspect import isclass
-from .src.utils.icons import IconCollection
-# from .src.utils.thumbnails import ThumbnailCollection
+from .src.addon.preferences import cvb_addon_register, cvb_addon_unregister
 from .src.addon.preferences import CVB_AddonPreferences
 from .src.addon.preferencesProps import CVB_AddonPreferenceProps
 from .src.panel.nPanel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
@@ -77,7 +76,7 @@ def register():
     register_class(CVB_AddonPreferences)
 
     # Setup any additional data the other classes may need
-    CVB_AddonPreferences.cvb_icons = IconCollection()
+    cvb_addon_register()
 
     # Okay, load the remainder of the classes
     for cls in CLASS_REGISTRY[2:]:
@@ -86,11 +85,10 @@ def register():
 
 def unregister():
 
-    if CVB_AddonPreferences.cvb_icons is not None:
-        del CVB_AddonPreferences.cvb_icons
-
     for cls in reversed(CLASS_REGISTRY):
         unregister_class(cls)
+
+    cvb_addon_unregister()
 
 
 if classes_verified and __name__ == "__main__":

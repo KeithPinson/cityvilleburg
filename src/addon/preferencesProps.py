@@ -16,3 +16,4 @@ class CVB_AddonPreferenceProps(PropertyGroup):
     cvb_asset_folder: StringProperty("File Path",
                                      default=str(Path(__file__).parent.parent.joinpath('assets')),
                                      subtype='DIR_PATH')
+
