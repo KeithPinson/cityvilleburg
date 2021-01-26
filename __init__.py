@@ -16,8 +16,9 @@ from inspect import isclass
 from .src.utils.icons import IconCollection
 # from .src.utils.thumbnails import ThumbnailCollection
 from .src.addon.preferences import CVB_AddonPreferences
-from .src.panel.n_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
-from .src.panel.n_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
+from .src.addon.preferencesProps import CVB_AddonPreferenceProps
+from .src.panel.nPanel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
+from .src.panel.nPanel import CVB_PT_Help, CVB_OT_GettingStartedHelp
 
 
 bl_info = {
@@ -29,7 +30,8 @@ bl_info = {
     "location": "View3D > N-panel",
     "category": "Add Mesh",
     "support": "COMMUNITY",
-    "warning": "This Add-on is Beta software. Please report any bugs encountered.",
+    "warning": "This Add-on is under development. Use at this time is not advised.",
+    "saved_warning": "This Add-on is Beta software. Please report any bugs encountered.",
     "wiki_url": "https://github.com/KeithPinson/cityvilleburg/wiki",
     "tracker_url": "https://github.com/KeithPinson/cityvilleburg/issues"
 }
@@ -43,7 +45,8 @@ print("\n", f'''*** {bl_info['name']} ***''')
 # and then try to perform a simple verification test of class existence.
 
 CLASS_REGISTRY = (
-    CVB_AddonPreferences,  # We treat this class a special case (keep it at the top)
+    CVB_AddonPreferenceProps,  # | Addon classes (keep at the top)
+    CVB_AddonPreferences,  # |
     CVB_OT_NewMap,
     CVB_OT_GenCity,
     CVB_OT_GettingStartedHelp,
@@ -68,14 +71,17 @@ classes_verified = verify_classes(CLASS_REGISTRY)
 
 def register():
 
-    # We treat the addon preferences class as our root class
+    # The addon classes may contain data referenced by the
+    # other classes so we make sure they are registered first
+    register_class(CVB_AddonPreferenceProps)
     register_class(CVB_AddonPreferences)
 
+    # Setup any additional data the other classes may need
     CVB_AddonPreferences.cvb_icons = IconCollection()
 
-    for cls in CLASS_REGISTRY:
-        if cls is not CVB_AddonPreferences:
-            register_class(cls)
+    # Okay, load the remainder of the classes
+    for cls in CLASS_REGISTRY[2:]:
+        register_class(cls)
 
 
 def unregister():

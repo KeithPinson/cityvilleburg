@@ -48,7 +48,9 @@ class CVB_PT_Main(Panel):
     #
     #       (F) Hide Map Drawing Checkbox
     #
-    #       (G) City Style Drop down
+    #       (G) Map Max X: Number and Max Y: Number
+    #
+    #       (H) City Style Drop down
     #
     #           Chicago Grid  (A city modeled after the American grid system)
     #           Cybercity     (A city modeled on the if you can't build out, build up)

@@ -1,6 +1,7 @@
-# CITYVILLEBURG; <br/>A City Generator
+# CITYVILLEBURG
+## Synthetic Cities<br/>for Research, Art, and Gaming
+*Cityvilleburg is an addon for Blender*
 
-Cityvilleburg is an addon for Blender.
 
 ## Geographic Coordinate System
 
