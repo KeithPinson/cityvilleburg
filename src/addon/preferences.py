@@ -1,15 +1,15 @@
 #
 # Pertinent city generator preferences and settings
-# that apply to the Blender workspace. None of these
-# settings are saved in or effect the actual blend file
-# itself.
+# that apply to the Blender workspace. These settings
+# are not meant to be saved in or effect the actual
+# blend file itself -- we will do that elsewhere.
 #
 # Copyright (c) 2021 Keith Pinson
 
 import bpy
+import pathlib
 from bpy.types import AddonPreferences, PropertyGroup
 from bpy.props import PointerProperty, StringProperty
-from .preferencesProps import CVB_AddonPreferenceProps
 from ..utils.icons import IconCollection
 # from ..utils.thumbnails import ThumbnailCollection
 
@@ -21,25 +21,27 @@ class CVB_AddonPreferences(AddonPreferences):
     cvb_thumbnails = None
     cvb_properties = None
 
+    cvb_asset_folder: StringProperty("File Path",
+                                     default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
+                                     subtype='DIR_PATH')
+
     def draw(self, context):
-        column = self.layout.column()
+        preferences_column = self.layout.column()
 
-        box = column.box()
+        # Assets Folder Entry
+        assets_folder = preferences_column.box().column().split(factor=0.2)
 
-        row = box.row()
-        row.label(text='Assets Folder')
+        #       Label
+        assets_folder_label = assets_folder
+        assets_folder_label.label(text='Assets Folder')
 
-        # box = row.box()
-        # column = box.column()
-        #
-        # row = column.row(align=True)
-        # row.prop(cvb_prefs(context).cvb_properties, 'cvb_asset_folder', text='Location')
+        #       Field
+        assets_folder_field = assets_folder
+        assets_folder_field.prop(self, 'cvb_asset_folder', text='')
 
 
 def cvb_addon_register():
     CVB_AddonPreferences.cvb_icons = IconCollection()
-
-    CVB_AddonPreferences.cvb_properties = PointerProperty(type=CVB_AddonPreferenceProps)
 
 
 def cvb_addon_unregister():
