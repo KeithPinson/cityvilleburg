@@ -6,7 +6,7 @@
 import bpy
 from bpy.types import Panel, Operator
 from ..utils import icons
-from ..addon.preferences import cvb_icon
+from ..addon.preferences import cvb_prefs, cvb_icon
 
 
 #         column = layout.column(align=True)
@@ -76,7 +76,11 @@ class CVB_PT_Main(Panel):
 
         row = box.row(align=True)
         row.label(text="Seed:")
-        # row.prop(cvb, 'cvb_new_map_seed', expand=False)
+
+        seed = cvb_prefs(context).cvb_seed.seed
+        #bpy.context.preferences.addons['cityvilleburg'].preferences.cvb_seed.seed
+        #row.prop(cvb, 'cvb_new_map_seed', expand=False)
+        row.label(text=f"{seed}")
 
         # (L) New Map Group Box
         box = self.layout.box()
