@@ -14,7 +14,7 @@ import bpy
 from bpy.utils import register_class, unregister_class
 from inspect import isclass
 from .src.addon.preferences import cvb_addon_register, cvb_addon_unregister
-from .src.addon.preferences import CVB_AddonPreferences
+from .src.addon.preferences import CVB_AddonPreferences, CVB_SketchIdProperties
 from .src.panel.nPanel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
 from .src.panel.nPanel import CVB_PT_Help, CVB_OT_GettingStartedHelp
 
@@ -43,6 +43,7 @@ print("\n", f'''*** {bl_info['name']} ***''')
 # and then try to perform a simple verification test of class existence.
 
 CLASS_REGISTRY = (
+    CVB_SketchIdProperties, # |
     CVB_AddonPreferences,   # | Addon classes (keep at the top)
     CVB_OT_NewMap,
     CVB_OT_GenCity,
@@ -70,13 +71,14 @@ def register():
 
     # The addon classes may contain data referenced by the
     # other classes so we make sure they are registered first
+    register_class(CVB_SketchIdProperties)
     register_class(CVB_AddonPreferences)
 
     # Setup any additional data the other classes may need
     cvb_addon_register()
 
     # Okay, load the remainder of the classes
-    for cls in CLASS_REGISTRY[1:]:
+    for cls in CLASS_REGISTRY[2:]:
         register_class(cls)
 
 

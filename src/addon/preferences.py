@@ -9,17 +9,49 @@
 import bpy
 import pathlib
 from bpy.types import AddonPreferences, PropertyGroup
-from bpy.props import PointerProperty, StringProperty
+from bpy.props import PointerProperty, StringProperty, IntProperty
 from ..utils.icons import IconCollection
 # from ..utils.thumbnails import ThumbnailCollection
+
+
+class CVB_SketchIdProperties(PropertyGroup):
+    bl_idname = "cvb_SketchSeedProperties"
+
+    def auto_increment(self):
+        pass
+
+    seed: IntProperty(
+        name='Seed',
+        description='Seed to reproduce the random sketch',
+        default=1,
+        min=1)
+
+    variant: IntProperty(
+        name='Variant',
+        description='Alterations of the provided sketch are marked as a variant',
+        default=1,
+        min=0)
+
+    name: StringProperty(
+        name="SketchID",
+        description="Sketch ID",
+        default="1.0")
 
 
 class CVB_AddonPreferences(AddonPreferences):
     bl_idname = __package__.split(".")[0]
 
+    #
+    # Serialized properties
+    #
+    # Registration occurs when Blender is started so we
+    # should try to do our own late binding (no reason
+    # to tie up resources unnecessarily)
+    #
     cvb_icons = None
     cvb_thumbnails = None
     cvb_properties = None
+    cvb_seed: PointerProperty(type=CVB_SketchIdProperties)
 
     cvb_asset_folder: StringProperty("File Path",
                                      default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
