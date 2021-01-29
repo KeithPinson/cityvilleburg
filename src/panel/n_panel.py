@@ -41,8 +41,6 @@ class CVB_PT_Main(Panel):
     #
     #           (D) Back/Next Stepper Buttons
     #
-    #               -
-    #
     #           (E) A "+ New" or City Name Drop-Down Box
     #
     #               - Pressing "+ New" defaults to the word "City_" prepended to the
@@ -88,14 +86,14 @@ class CVB_PT_Main(Panel):
                      text="New Map",
                      icon_value=cvb_icon(context, "icon-new-map-l"))
 
+        # (C) Seed
         row = box.row(align=True)
-        row.label(text="Seed:")
-
-        # seed = cvb_prefs(context).cvb_seed.seed
+        #row.prop(soft_mod, "smooth_iterations", text="Iterations")
+        seed = cvb_prefs(context).cvb_seed
         #bpy.context.preferences.addons['cityvilleburg'].preferences.cvb_seed.seed
         #row.prop(cvb, 'cvb_new_map_seed', expand=False)
 
-        # row.label(text=f"{seed}")
+        row.label(text=f"{seed}")
 
 
         # (L) New Map Group Box

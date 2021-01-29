@@ -11,7 +11,7 @@ from bpy.props import PointerProperty, StringProperty, EnumProperty
 def modify_max_size(self, context):
     pass
 
-class CVB_AddonPreferenceProps(PropertyGroup):
+class CVB_PanelProperties(PropertyGroup):
 
     seed: StringProperty(name="seed")
 

@@ -1,3 +1,4 @@
+"""The Preferences of the Blender Add-on"""
 #
 # Pertinent city generator preferences and settings
 # that apply to the Blender workspace. These settings
@@ -6,39 +7,14 @@
 #
 # Copyright (c) 2021 Keith Pinson
 
-import bpy
 import pathlib
-from bpy.types import AddonPreferences, PropertyGroup
-from bpy.props import PointerProperty, StringProperty, IntProperty
+from bpy.types import AddonPreferences
+from bpy.props import StringProperty, IntProperty
 from ..utils.icons import IconCollection
-# from ..utils.thumbnails import ThumbnailCollection
-
-
-class CVB_SketchIdProperties(PropertyGroup):
-    bl_idname = "cvb_SketchSeedProperties"
-
-    def auto_increment(self):
-        pass
-
-    seed: IntProperty(
-        name='Seed',
-        description='Seed to reproduce the random sketch',
-        default=1,
-        min=1)
-
-    variant: IntProperty(
-        name='Variant',
-        description='Alterations of the provided sketch are marked as a variant',
-        default=1,
-        min=0)
-
-    name: StringProperty(
-        name="SketchID",
-        description="Sketch ID",
-        default="1.0")
 
 
 class CVB_AddonPreferences(AddonPreferences):
+    """Class used to display add-on preferences"""
     bl_idname = __package__.split(".")[0]
 
     #
@@ -51,13 +27,23 @@ class CVB_AddonPreferences(AddonPreferences):
     cvb_icons = None
     cvb_thumbnails = None
     cvb_properties = None
-    cvb_seed: PointerProperty(type=CVB_SketchIdProperties)
 
-    cvb_asset_folder: StringProperty("File Path",
-                                     default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
-                                     subtype='DIR_PATH')
+    # This seed is hidden and should match the value in the N-panel
+    cvb_seed: IntProperty(
+        name='Seed',
+        description='Last seed value used',
+        default=1,
+        min=1,
+    )
+
+    cvb_asset_folder: \
+        StringProperty("File Path",
+                       default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
+                       subtype='DIR_PATH')
 
     def draw(self, context):
+        # pylint: disable=unused-argument,no-member
+        """Override of AddonPreferences draw() method"""
         preferences_column = self.layout.column()
 
         # Assets Folder Entry
@@ -73,19 +59,23 @@ class CVB_AddonPreferences(AddonPreferences):
 
 
 def cvb_addon_register():
+    """Lower level support to register"""
     CVB_AddonPreferences.cvb_icons = IconCollection()
 
 
 def cvb_addon_unregister():
+    """Lower level support for unregistering"""
     if CVB_AddonPreferences.cvb_icons is not None:
         del CVB_AddonPreferences.cvb_icons
 
 
 def cvb_prefs(context):
+    """Convenience function to get the add-on preferences object"""
     return context.preferences.addons['cityvilleburg'].preferences
 
 
 def cvb_icon(context, icon_name):
+    """Late binding support of add-on icons"""
     cvb_icons = cvb_prefs(context).cvb_icons
 
     return cvb_icons.get_icon_id(icon_name)
