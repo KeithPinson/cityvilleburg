@@ -6,6 +6,7 @@
 import bpy
 from bpy.types import Panel, Operator
 from ..utils import icons
+from bpy.props import IntProperty
 from ..addon.preferences import cvb_prefs, cvb_icon
 
 
@@ -23,44 +24,57 @@ class CVB_PT_Main(Panel):
     # (A) New Map Group Box
     #     -----------------
     #
+    #   Cities are composed of multiple layers:
+    #
+    #       (1) Sketch
+    #       (2) Map
+    #       (3) Terrain
+    #       (4) City
+    #
+    #   A sketch is used to make a map. A map and terrain combine to make a city.
+    #   Cities which are composed of many parts can be manipulated to effect the
+    #   map and the terrain. And, changing the map, changes the sketch.
+    #
     #   (B) New Map Button  (doubles as section title)
     #
-    #       (C) Seed: Number
+    #       (C) Seed: A number used to make a reproducible random sketch
     #
     #           (D) Back/Next Stepper Buttons
-    #           (E) Hide un-used maps Checkbox
     #
-    #           [ The interface between this control and the map sketch is complex:
+    #               -
     #
-    #               1. Gray out un-used map numbers
-    #               2. By default there is no map drawing; checkboxes should grayed and
-    #                  disabled if there is no map drawing; "+ New" should be displayed
-    #                  for seed number
-    #               3. If there is no map drawing and the "New Map" button is pressed,
-    #                  then draw the map sketch from the random seed and then begin
-    #                  the map generation process; checkboxes un-grayed
-    #               3. Drawings that have been modified and cannot be
-    #                  automatically regenerated are given a modified map number
-    #               4. Changing the number should result in an immediate display
-    #                  of the map drawing; if it is hidden it should be shown and
-    #                  "Hide un-used" checkbox checked and "Hide Map Drawing" unchecked
-    #           ]
+    #           (E) A "+ New" or City Name Drop-Down Box
     #
-    #       (F) Hide Map Drawing Checkbox
+    #               - Pressing "+ New" defaults to the word "City_" prepended to the
+    #                 seed number, followed by decimal in the usual Blender fashion,
+    #                 eg. "City_1.001"
+    #
+    #               - "+ New" Should remain an option to select in the drop down box
+    #
+    #               - Selecting a name should change the seed number displayed in (C)
+    #
+    #               - After "+ New" is pressed the complete random sketch be drawn
+    #
+    #       (F) Hide sketch Checkbox
     #
     #       (G) Map Max X: Number and Max Y: Number
     #
-    #       (H) City Style Drop down
+    #       (H) Map Style Drop down
     #
-    #           Chicago Grid  (A city modeled after the American grid system)
-    #           Cybercity     (A city modeled on the if you can't build out, build up)
-    #           Dodge         (A town with a main street)
-    #           Nordingenton  (A hamlet, years ago built inside a defensive wall)
+    #           Chicago Grid  (A city map modeled after the American grid system)
+    #           Cybercity     (A city map modeled on the if you can't build out, build up)
+    #           OK Dodge      (A town map with a main street)
+    #           Nordingenton  (A layout from years ago when cities formed inside a defensive wall)
 
     # (L) Generate City Group Box
     #     -----------------------
     #
     #   (M) Generate City Button
+
+    test_seed: IntProperty(
+        name="Seed",
+        description="Reproducible random sketch",
+        default=1, min=1, max=32_767)
 
     def draw(self, context):
         # TODO: Rescan the CVB layers so that we can gray-out controls appropriately
@@ -77,10 +91,12 @@ class CVB_PT_Main(Panel):
         row = box.row(align=True)
         row.label(text="Seed:")
 
-        seed = cvb_prefs(context).cvb_seed.seed
+        # seed = cvb_prefs(context).cvb_seed.seed
         #bpy.context.preferences.addons['cityvilleburg'].preferences.cvb_seed.seed
         #row.prop(cvb, 'cvb_new_map_seed', expand=False)
-        row.label(text=f"{seed}")
+
+        # row.label(text=f"{seed}")
+
 
         # (L) New Map Group Box
         box = self.layout.box()
