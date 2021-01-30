@@ -73,7 +73,7 @@ class CVB_PT_Main(Panel):
     def draw(self, context):
         # TODO: Rescan the CVB layers so that we can gray-out controls appropriately
 
-        props = context.scene.panel_props
+        cvb = context.scene.CVB
 
         # (A) New Map Group Box
         box = self.layout.box()
@@ -87,7 +87,7 @@ class CVB_PT_Main(Panel):
         # (C) Seed
         # seed = cvb_prefs(context).cvb_seed
         row = box.row(align=True)
-        row.prop(props, "Seed", text="Seed")
+        row.prop(cvb, "seed", text="Seed")
 
         # (L) New Map Group Box
         box = self.layout.box()

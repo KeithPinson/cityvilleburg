@@ -19,7 +19,7 @@ from .src.addon.preferences import cvb_addon_register, cvb_addon_unregister
 from .src.addon.preferences import CVB_AddonPreferences
 from .src.panel.n_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
 from .src.panel.n_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
-from .src.panel.panel_props import CVB_PanelProperties
+from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
 
 
 bl_info = {
@@ -46,13 +46,12 @@ print("\n", f'''*** {bl_info['name']} ***''')
 # and then try to perform a simple verification test of class existence.
 
 CLASS_REGISTRY = (
-    CVB_AddonPreferences,    # | Addon classes (keep at the top)
+    CVB_AddonPreferences,    # | Addon classes (keep at top)
     CVB_OT_NewMap,
     CVB_OT_GenCity,
     CVB_OT_GettingStartedHelp,
     CVB_PT_Main,
     CVB_PT_Help,
-    CVB_PanelProperties,
 )
 
 
@@ -78,6 +77,7 @@ def register():
 
     # Setup any additional data the other classes may need
     cvb_addon_register()
+    cvb_panel_register()
 
     # Okay, load the remainder of the classes
     for cls in CLASS_REGISTRY[1:]:
@@ -89,6 +89,7 @@ def unregister():
     for cls in reversed(CLASS_REGISTRY):
         unregister_class(cls)
 
+    cvb_panel_unregister()
     cvb_addon_unregister()
 
 
