@@ -1,5 +1,14 @@
+"""Properties of the N-Key-Panel"""
 #
-# Properties of the N-Panel.
+# The properties of the N-Key-Panel. We want to store these
+# in the Blend file and to facilitate this we need to
+# put the properties in a class derived from the
+# PropertyGroup.
+#
+# It is not obvious but if we attach the properties to
+# the bpy.types.Scene object then Blender will keep the
+# the properties in the bpy.context.scene object and
+# the properties will be saved in the file.
 #
 # Copyright (c) 2021 Keith Pinson
 
@@ -9,15 +18,16 @@ from bpy.props import PointerProperty, StringProperty, IntProperty
 
 
 class CVB_PanelProperties(PropertyGroup):
+    # pylint: disable=invalid-name
     """Panel properties saved to the blend file"""
 
     def modify_max_size(self, context):
         """max map size"""
-        pass
+        return 1000
 
     def update_sketch_name(self, context):
         """Combo name, seed, variant"""
-        pass
+        return "City_1"
 
     seed: IntProperty(
         name="Seed",

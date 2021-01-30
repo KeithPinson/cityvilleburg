@@ -1,14 +1,17 @@
+"""City Generator N-Key-Panel """
 #
-# The main interface to the city generator.
+# The main interface to the city generator. This is
+# where the buttons and controls are to sketch the
+# city map, create the map, and generate the city are.
+#
+# The panel properties can be found in the
+# bpy.context.scene.CVB object.
 #
 # Copyright (c) 2021 Keith Pinson
 
 import bpy
 from bpy.types import Panel, Operator
-from ..utils import icons
-from bpy.props import IntProperty
-from ..addon.preferences import cvb_prefs, cvb_icon
-from . import panel_props
+from ..addon.preferences import cvb_icon
 
 
 #         column = layout.column(align=True)
@@ -16,6 +19,8 @@ from . import panel_props
 
 
 class CVB_PT_Main(Panel):
+    # pylint: disable=invalid-name
+    """Main Panel of the N-Key Panels"""
     bl_label = 'Cityvilleburg'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -71,23 +76,28 @@ class CVB_PT_Main(Panel):
     #   (M) Generate City Button
 
     def draw(self, context):
-        # TODO: Rescan the CVB layers so that we can gray-out controls appropriately
-
         cvb = context.scene.CVB
 
+        panel_column = self.layout
+
         # (A) New Map Group Box
-        box = self.layout.box()
+        new_map_group_box = panel_column.box()
 
         # (B) New Map Button
-        row = box.row(align=True)
-        row.operator("object.new_map",
-                     text="New Map",
-                     icon_value=cvb_icon(context, "icon-new-map-l"))
+        new_map_button = new_map_group_box.row(align=True)
+        new_map_button.operator("object.new_map",
+                                text="New Map",
+                                icon_value=cvb_icon(context, "icon-new-map-l"))
 
         # (C) Seed
+        # TODO: Set the seed value in the add-on preferences too
         # seed = cvb_prefs(context).cvb_seed
-        row = box.row(align=True)
-        row.prop(cvb, "seed", text="Seed")
+        seed_stepper = new_map_group_box.row(align=True)
+
+        # (D) Back/Next (handled by Blender by default)
+        seed_stepper.prop(cvb, "seed", text="Seed")
+
+        # (E)
 
         # (L) New Map Group Box
         box = self.layout.box()
@@ -100,6 +110,8 @@ class CVB_PT_Main(Panel):
 
 
 class CVB_PT_Help(Panel):
+    # pylint: disable=invalid-name
+    """Help Panel of the N-Key Panels"""
     bl_label = 'Help'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -128,6 +140,8 @@ class CVB_PT_Help(Panel):
 
 
 class CVB_OT_NewMap(Operator):
+    # pylint: disable=invalid-name
+    """New Map Button"""
     bl_idname = 'object.new_map'
     bl_label = 'New Map'
     bl_options = {"REGISTER", "UNDO"}
@@ -147,6 +161,8 @@ class CVB_OT_NewMap(Operator):
 
 
 class CVB_OT_GenCity(Operator):
+    # pylint: disable=invalid-name
+    """Generate City Button"""
     bl_idname = 'object.gen_city'
     bl_label = 'Generate City'
     bl_options = {"REGISTER", "UNDO"}
@@ -160,6 +176,8 @@ class CVB_OT_GenCity(Operator):
 
 
 class CVB_OT_GettingStartedHelp(Operator):
+    # pylint: disable=invalid-name
+    """Help Operator"""
     bl_idname = 'object.help'
     bl_label = 'Help Getting Started'
     bl_options = {"REGISTER", "UNDO"}

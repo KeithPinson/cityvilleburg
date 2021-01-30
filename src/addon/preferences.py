@@ -14,6 +14,7 @@ from ..utils.icons import IconCollection
 
 
 class CVB_AddonPreferences(AddonPreferences):
+    # pylint: disable=invalid-name
     """Class used to display add-on preferences"""
     bl_idname = __package__.split(".")[0]
 

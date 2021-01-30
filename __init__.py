@@ -13,12 +13,12 @@
 # SOFTWARE.
 """
 
-from bpy.utils import register_class, unregister_class
 from inspect import isclass
+from bpy.utils import register_class, unregister_class
 from .src.addon.preferences import cvb_addon_register, cvb_addon_unregister
 from .src.addon.preferences import CVB_AddonPreferences
-from .src.panel.n_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
-from .src.panel.n_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
+from .src.panel.n_key_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
+from .src.panel.n_key_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
 from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
 
 
@@ -28,7 +28,7 @@ bl_info = {
     "description": "A City Generator, version  zero.0",
     "blender": (2, 91, 0),
     "version": (0, 0, 1),
-    "location": "View3D > N-panel",
+    "location": "View3D > N-Key-Panel",
     "category": "Add Mesh",
     "support": "COMMUNITY",
     "warning": "This Add-on is under development. Use at this time is not advised.",
@@ -36,6 +36,7 @@ bl_info = {
     "wiki_url": "https://github.com/KeithPinson/cityvilleburg/wiki",
     "tracker_url": "https://github.com/KeithPinson/cityvilleburg/issues"
 }
+
 
 # Make it clear where the output on the console for this addon begins
 print("\n", f'''*** {bl_info['name']} ***''')
@@ -56,6 +57,7 @@ CLASS_REGISTRY = (
 
 
 def verify_classes(registry):
+    """Verify that we have all our required classes"""
     all_verified = True
 
     for reg in registry:
@@ -66,10 +68,11 @@ def verify_classes(registry):
     return all_verified
 
 
-classes_verified = verify_classes(CLASS_REGISTRY)
+CLASSES_VERIFIED = verify_classes(CLASS_REGISTRY)
 
 
 def register():
+    """Register the addon"""
 
     # The addon classes may contain data referenced by the
     # other classes so we make sure they are registered first
@@ -85,6 +88,7 @@ def register():
 
 
 def unregister():
+    """Unregister the addon"""
 
     for cls in reversed(CLASS_REGISTRY):
         unregister_class(cls)
@@ -93,5 +97,5 @@ def unregister():
     cvb_addon_unregister()
 
 
-if classes_verified and __name__ == "__main__":
+if CLASSES_VERIFIED and __name__ == "__main__":
     register()
