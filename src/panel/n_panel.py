@@ -8,6 +8,7 @@ from bpy.types import Panel, Operator
 from ..utils import icons
 from bpy.props import IntProperty
 from ..addon.preferences import cvb_prefs, cvb_icon
+from . import panel_props
 
 
 #         column = layout.column(align=True)
@@ -61,7 +62,7 @@ class CVB_PT_Main(Panel):
     #
     #           Chicago Grid  (A city map modeled after the American grid system)
     #           Cybercity     (A city map modeled on the if you can't build out, build up)
-    #           OK Dodge      (A town map with a main street)
+    #           Dodge 1880    (A town map with a main street)
     #           Nordingenton  (A layout from years ago when cities formed inside a defensive wall)
 
     # (L) Generate City Group Box
@@ -69,13 +70,10 @@ class CVB_PT_Main(Panel):
     #
     #   (M) Generate City Button
 
-    test_seed: IntProperty(
-        name="Seed",
-        description="Reproducible random sketch",
-        default=1, min=1, max=32_767)
-
     def draw(self, context):
         # TODO: Rescan the CVB layers so that we can gray-out controls appropriately
+
+        props = context.scene.panel_props
 
         # (A) New Map Group Box
         box = self.layout.box()
@@ -87,14 +85,9 @@ class CVB_PT_Main(Panel):
                      icon_value=cvb_icon(context, "icon-new-map-l"))
 
         # (C) Seed
+        # seed = cvb_prefs(context).cvb_seed
         row = box.row(align=True)
-        #row.prop(soft_mod, "smooth_iterations", text="Iterations")
-        seed = cvb_prefs(context).cvb_seed
-        #bpy.context.preferences.addons['cityvilleburg'].preferences.cvb_seed.seed
-        #row.prop(cvb, 'cvb_new_map_seed', expand=False)
-
-        row.label(text=f"{seed}")
-
+        row.prop(props, "Seed", text="Seed")
 
         # (L) New Map Group Box
         box = self.layout.box()
