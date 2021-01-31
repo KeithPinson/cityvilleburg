@@ -61,14 +61,14 @@ class CVB_PT_Main(Panel):
     #
     #       (F) Hide sketch Checkbox
     #
-    #       (G) Map Max X: Number and Max Y: Number
+    #       (G) Map X: Number and Y: Number
     #
     #       (H) Map Style Drop down
     #
-    #           Chicago Grid  (A city map modeled after the American grid system)
-    #           Cybercity     (A city map modeled on the if you can't build out, build up)
-    #           Dodge 1880    (A town map with a main street)
-    #           Nordingenton  (A layout from years ago when cities formed inside a defensive wall)
+    #           Chicago Grid    (A city map modeled after the American grid system)
+    #           Cyber Scrapers  (A city map modeled on the if you can't build out, build up)
+    #           Dodge 1880      (A town map with a main street)
+    #           Nordingenton    (A layout from years ago when cities formed inside a defensive wall)
 
     # (L) Generate City Group Box
     #     -----------------------
@@ -89,15 +89,34 @@ class CVB_PT_Main(Panel):
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
+        new_map_button_options = new_map_group_box.box()
+
+
         # (C) Seed
         # TODO: Set the seed value in the add-on preferences too
         # seed = cvb_prefs(context).cvb_seed
-        seed_stepper = new_map_group_box.row(align=True)
+        seed_stepper = new_map_button_options.row(align=True)
 
-        # (D) Back/Next (handled by Blender by default)
+        #       (D) Back/Next (handled by Blender by default)
         seed_stepper.prop(cvb, "seed", text="Seed")
 
-        # (E)
+        #       (E) City Name Drop Down
+        city_name_dropdown = new_map_button_options.row(align=True)
+        city_name_dropdown.prop(cvb, "sketch_name", text="Sketch")
+
+        #       (F) Hide sketch
+        hide_sketch_checkbox = new_map_button_options.row(align=True)
+        hide_sketch_checkbox.prop(cvb, "sketch_visible", text="Sketch Visible?")
+
+        #       (G) Map X,Y
+        sketch_x_y = new_map_button_options.row(align=True)
+        sketch_x_y.prop(cvb, "sketch_x", text="X")
+        sketch_x_y.prop(cvb, "sketch_y", text="Y")
+
+        #       (H) Map Style Drop Down
+        map_style_dropdown = new_map_button_options.row(align=True)
+        map_style_dropdown.prop(cvb, "sketch_map_style", text="Style")
+
 
         # (L) New Map Group Box
         box = self.layout.box()

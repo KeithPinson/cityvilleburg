@@ -14,20 +14,25 @@
 
 import bpy
 from bpy.types import PropertyGroup
-from bpy.props import PointerProperty, StringProperty, IntProperty
+from bpy.props import (
+    PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
 
 
 class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """Panel properties saved to the blend file"""
 
-    def modify_max_size(self, context):
+    def modify_sketch_size(self, context):
         """max map size"""
         return 1000
 
     def update_sketch_name(self, context):
         """Combo name, seed, variant"""
         return "City_1"
+
+    def update_sketch_visibility(self, context):
+        """Toggle visibility of sketch layer"""
+        return True
 
     seed: IntProperty(
         name="Seed",
@@ -40,22 +45,47 @@ class CVB_PanelProperties(PropertyGroup):
         default=0, min=0, max=999)
 
     sketch_name: StringProperty(
-        name="",
+        name="Sketch Name",
         description="Sketch",
-        default="City_1",
+        default="+  New",
         update=update_sketch_name)
 
-    max_width: StringProperty(
-        name="",
-        description="Max Width",
-        default="1000",
-        update=modify_max_size)
+    sketch_visible: BoolProperty(
+        name="Sketch Visibility",
+        description="Sketch Visible?",
+        default=True,
+        update=update_sketch_visibility)
 
-    max_height: StringProperty(
+    sketch_x: IntProperty(
+        name="Sketch X",
+        description="Sketch X",
+        min=1,
+        max=10_000,
+        step=100,
+        default=1000,
+        update=modify_sketch_size)
+
+    sketch_y: IntProperty(
+        name="Sketch Y",
+        description="Sketch Y",
+        min=1,
+        max=10_000,
+        step=100,
+        default=1000,
+        update=modify_sketch_size)
+
+    city_style_list = [
+        ('grid', "Chicago Grid", "A city map modeled after the American grid system"),
+        ('skyscrapers', "Cyber Scrapers", "A city map modeled on the if you can't build out, build up"),
+        ('western', "Dodge 1880", "A town map with a main street"),
+        ('medieval', "Nordingenton", "A layout from years ago when cities formed inside a defensive wall")
+    ]
+
+    sketch_map_style: EnumProperty(
         name="",
-        description="Max Height",
-        default="1000",
-        update=modify_max_size)
+        description="Style hint that affects map sketch",
+        default='grid',
+        items=city_style_list)
 
 
 def cvb_panel_register():
