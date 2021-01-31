@@ -91,32 +91,30 @@ class CVB_PT_Main(Panel):
 
         new_map_button_options = new_map_group_box.box()
 
-
         # (C) Seed
         # TODO: Set the seed value in the add-on preferences too
         # seed = cvb_prefs(context).cvb_seed
         seed_stepper = new_map_button_options.row(align=True)
 
         #       (D) Back/Next (handled by Blender by default)
-        seed_stepper.prop(cvb, "seed", text="Seed")
+        seed_stepper.prop(cvb, "seed_prop", text="Seed")
 
         #       (E) City Name Drop Down
         city_name_dropdown = new_map_button_options.row(align=True)
-        city_name_dropdown.prop(cvb, "sketch_name", text="Sketch")
+        city_name_dropdown.prop(cvb, "sketch_name_prop", text="Sketch")
 
         #       (F) Hide sketch
         hide_sketch_checkbox = new_map_button_options.row(align=True)
-        hide_sketch_checkbox.prop(cvb, "sketch_visible", text="Sketch Visible?")
+        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Sketch Visible?")
 
         #       (G) Map X,Y
         sketch_x_y = new_map_button_options.row(align=True)
-        sketch_x_y.prop(cvb, "sketch_x", text="X")
-        sketch_x_y.prop(cvb, "sketch_y", text="Y")
+        sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
+        sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
         #       (H) Map Style Drop Down
         map_style_dropdown = new_map_button_options.row(align=True)
-        map_style_dropdown.prop(cvb, "sketch_map_style", text="Style")
-
+        map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
 
         # (L) New Map Group Box
         box = self.layout.box()

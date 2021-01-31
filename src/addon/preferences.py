@@ -37,7 +37,7 @@ class CVB_AddonPreferences(AddonPreferences):
         min=1,
     )
 
-    cvb_asset_folder: \
+    cvb_asset_folder_prop: \
         StringProperty("File Path",
                        default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
                        subtype='DIR_PATH')
@@ -56,7 +56,7 @@ class CVB_AddonPreferences(AddonPreferences):
 
         #       Field
         assets_folder_field = assets_folder
-        assets_folder_field.prop(self, 'cvb_asset_folder', text='')
+        assets_folder_field.prop(self, 'cvb_asset_folder_prop', text='')
 
 
 def cvb_addon_register():
