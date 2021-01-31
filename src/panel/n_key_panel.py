@@ -105,7 +105,10 @@ class CVB_PT_Main(Panel):
 
         #       (F) Hide sketch
         hide_sketch_checkbox = new_map_button_options.row(align=True)
-        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Sketch Visible?")
+
+        are_cities_in_list = len(cvb.sketch_name_list) > 1
+        hide_sketch_checkbox.enabled = are_cities_in_list
+        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
 
         #       (G) Map X,Y
         sketch_x_y = new_map_button_options.row(align=True)

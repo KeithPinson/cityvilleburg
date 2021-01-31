@@ -57,8 +57,8 @@ class CVB_PanelProperties(PropertyGroup):
 
     sketch_visible_prop: BoolProperty(
         name="Sketch Visibility",
-        description="Show Sketch?",
-        default=True,
+        description="Toggle Sketch Visibility" if len(sketch_name_list) > 1 else "Inactive until New Sketch",
+        default=True if len(sketch_name_list) > 1 else False,
         update=update_sketch_visibility)
 
     sketch_x_prop: IntProperty(
