@@ -59,11 +59,19 @@ class CVB_PT_Main(Panel):
     #
     #               - After "+ New" is pressed the complete random sketch be drawn
     #
-    #       (F) Hide sketch Checkbox
+    #           (F) A "+ New" button or City Name Field
     #
-    #       (G) Map X: Number and Y: Number
+    #               - If the list of City Names is empty then act as a button to 
+    #                 create a sketch
     #
-    #       (H) Map Style Drop down
+    #               - Otherwise, display the current City Name and allow it to be
+    #                 changed
+    #
+    #       (G) Hide sketch Checkbox
+    #
+    #       (H) Map X: Number and Y: Number
+    #
+    #       (I) Map Style Drop down
     #
     #           Chicago Grid    (A city map modeled after the American grid system)
     #           Cyber Scrapers  (A city map modeled on the if you can't build out, build up)
@@ -85,11 +93,14 @@ class CVB_PT_Main(Panel):
 
         # (B) New Map Button
         new_map_button = new_map_group_box.row(align=True)
+        new_map_button.scale_y = 1.3
         new_map_button.operator("object.new_map",
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
         new_map_button_options = new_map_group_box.box()
+
+        are_cities_in_list = len(cvb.sketch_name_list) > 1
 
         # (C) Seed
         # TODO: Set the seed value in the add-on preferences too
@@ -99,34 +110,43 @@ class CVB_PT_Main(Panel):
         #       (D) Back/Next (handled by Blender by default)
         seed_stepper.prop(cvb, "seed_prop", text="Seed")
 
+        #       City Name Entry
+        city_name_entry = new_map_button_options.row(align=True).box().row()
+        
         #       (E) City Name Drop Down
-        city_name_dropdown = new_map_button_options.row(align=True)
-        city_name_dropdown.prop(cvb, "sketch_name_prop", text="Sketch")
+        city_name_dropdown = city_name_entry.column().split(factor=0.25)
+        city_name_dropdown.enabled = are_cities_in_list
+        city_name_dropdown.prop(cvb, "sketch_name_prop", text="", icon_only=True, icon='MESH_GRID')
+        
+        #       (F) "+ New" button / City Name Field
+        city_name_field = city_name_entry.column()
+        city_name_field.label(text="A") if are_cities_in_list else city_name_entry. \
+            operator("object.new_sketch", text="New", icon='PLUS')
 
-        #       (F) Hide sketch
+        #       (G) Hide sketch
         hide_sketch_checkbox = new_map_button_options.row(align=True)
 
-        are_cities_in_list = len(cvb.sketch_name_list) > 1
         hide_sketch_checkbox.enabled = are_cities_in_list
         hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
 
-        #       (G) Map X,Y
+        #       (H) Map X,Y
         sketch_x_y = new_map_button_options.row(align=True)
         sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
         sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
-        #       (H) Map Style Drop Down
+        #       (I) Map Style Drop Down
         map_style_dropdown = new_map_button_options.row(align=True)
         map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
 
-        # (L) New Map Group Box
-        box = self.layout.box()
+        # (L) Generate City Group Box
+        generate_city_group_box = panel_column.box()
 
         # (M) Generate City Button
-        row = box.row(align=True)
-        row.operator("object.gen_city",
-                     text="Generate City",
-                     icon_value=cvb_icon(context, "icon-gen-city-l"))
+        generate_city_button = generate_city_group_box.row(align=True)
+        generate_city_button.scale_y = 1.3
+        generate_city_button.operator("object.gen_city",
+                                      text="Generate City",
+                                      icon_value=cvb_icon(context, "icon-gen-city-l"))
 
 
 class CVB_PT_Help(Panel):
@@ -190,6 +210,21 @@ class CVB_OT_GenCity(Operator):
 
     def execute(self, context):
         # Generate the city
+        bpy.ops.mesh.primitive_cube_add()
+
+        return {"FINISHED"}
+
+
+class CVB_OT_NewSketch(Operator):
+    # pylint: disable=invalid-name
+    """New Sketch Button"""
+    bl_idname = 'object.new_sketch'
+    bl_label = 'New'
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = """New city map sketch"""
+
+    def execute(self, context):
+        # Make a new sketch
         bpy.ops.mesh.primitive_cube_add()
 
         return {"FINISHED"}
