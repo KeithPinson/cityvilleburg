@@ -43,40 +43,58 @@ class CVB_PT_Main(Panel):
     #
     #   (B) New Map Button  (doubles as section title)
     #
-    #       (C) Seed: A number used to make a reproducible random sketch
+    #       Sketch Options:
     #
-    #           (D) Back/Next Stepper Buttons
+    #           (C) City Name Drop-Down Box
     #
-    #           (E) A "+ New" or City Name Drop-Down Box
+    #               - City names are displayed
     #
-    #               - Pressing "+ New" defaults to the word "City_" prepended to the
-    #                 seed number, followed by decimal in the usual Blender fashion,
-    #                 eg. "City_1.001"
+    #               - Drop down is disabled if no city names
     #
-    #               - "+ New" Should remain an option to select in the drop down box
+    #               - If city name is selected seed, type, size are updated
     #
-    #               - Selecting a name should change the seed number displayed in (C)
+    #           (D) City Name Field
     #
-    #               - After "+ New" is pressed the complete random sketch be drawn
+    #               - Default City name is "City" <seed> "_" <type> <size> <variant>
     #
-    #           (F) A "+ New" button or City Name Field
+    #                 Where:
+    #                       <seed> is integer
+    #                       <type> is 1 letter
+    #                       <size> is X km integer, "x", Y km integer and for values less than 1 km
+    #                                               meter integers followed by "m"
+    #                       Optional <variant> is "." followed by 3 decimal incremental integer
     #
-    #               - If the list of City Names is empty then act as a button to 
-    #                 create a sketch
+    #               - Editing name is disabled if no seed,type,size match
     #
-    #               - Otherwise, display the current City Name and allow it to be
-    #                 changed
+    #           (E) New Button
     #
-    #       (G) Hide sketch Checkbox
+    #               - Displayed name is added to city names
     #
-    #       (H) Map X: Number and Y: Number
+    #               - Name field is enabled and can be changed
     #
-    #       (I) Map Style Drop down
+    #               - No variant until sketch itself is edited
     #
-    #           Chicago Grid    (A city map modeled after the American grid system)
-    #           Cyber Scrapers  (A city map modeled on the if you can't build out, build up)
-    #           Dodge 1880      (A town map with a main street)
-    #           Nordingenton    (A layout from years ago when cities formed inside a defensive wall)
+    #           (F) Seed: A number used to make a reproducible random sketch
+    #
+    #               - Integer: 1 to 2^15-1
+    #               - Back/Next Stepper Buttons
+    #
+    #           (G) Map Style Drop down
+    #
+    #               "g" Chicago Grid    (A city map modeled after the American grid system)
+    #               "s" Cyber Scrapers  (A city map modeled on the if you can't build out, build up)
+    #               "h" Dodge 1880      (A town map with a main street)
+    #               "c" Nordingenton    (A layout from years ago when cities formed inside a defensive wall)
+    #
+    #           (H) Map X: Size and Y: Size (in meter integers)
+    #
+    #           (I) Hide sketch Checkbox
+    #
+    #           (J) Scale sketch Checkbox
+    #
+    #               - Toggle between the Map X,Y size and a proportion equivalent of the
+    #                 shortest dimension to 10 Meters
+    #
 
     # (L) Generate City Group Box
     #     -----------------------
@@ -98,45 +116,54 @@ class CVB_PT_Main(Panel):
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
-        new_map_button_options = new_map_group_box.box()
-
         are_cities_in_list = len(cvb.sketch_name_list) > 1
 
-        # (C) Seed
-        # TODO: Set the seed value in the add-on preferences too
-        # seed = cvb_prefs(context).cvb_seed
-        seed_stepper = new_map_button_options.row(align=True)
+        # New Map Options Box
+        new_map_button_options = new_map_group_box.box()
 
-        #       (D) Back/Next (handled by Blender by default)
-        seed_stepper.prop(cvb, "seed_prop", text="Seed")
-
-        #       City Name Entry
+        #       City Name Entry Row
         city_name_entry = new_map_button_options.row(align=True).box().row()
-        
-        #       (E) City Name Drop Down
+
+        #           (C) City Name Drop Down
         city_name_dropdown = city_name_entry.column().split(factor=0.25)
         city_name_dropdown.enabled = are_cities_in_list
         city_name_dropdown.prop(cvb, "sketch_name_prop", text="", icon_only=True, icon='MESH_GRID')
-        
-        #       (F) "+ New" button / City Name Field
+
+        #           (D) City Name Field
         city_name_field = city_name_entry.column()
-        city_name_field.label(text="A") if are_cities_in_list else city_name_entry. \
-            operator("object.new_sketch", text="New", icon='PLUS')
+        city_name_field.enabled = False
+        city_name_field.prop(cvb, "city_field_prop", text="")
 
-        #       (G) Hide sketch
-        hide_sketch_checkbox = new_map_button_options.row(align=True)
+        #           (E) "+" button
+        city_name_plus_button = city_name_entry.column()
+        city_name_plus_button.operator("object.new_sketch", text="", icon='PLUS')
 
-        hide_sketch_checkbox.enabled = are_cities_in_list
-        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
+        #       (F) Seed
+        # TODO: Set the seed value in the add-on preferences too
+        # seed = cvb_prefs(context).cvb_seed
+        seed_stepper = new_map_button_options.row(align=True)
+        seed_stepper.prop(cvb, "seed_prop", text="Seed")
+
+        #       (G) Map Style Drop Down
+        map_style_dropdown = new_map_button_options.row(align=True)
+        map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
 
         #       (H) Map X,Y
         sketch_x_y = new_map_button_options.row(align=True)
         sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
         sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
-        #       (I) Map Style Drop Down
-        map_style_dropdown = new_map_button_options.row(align=True)
-        map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
+        #       Hide/Scale Row
+        hide_scale_row = new_map_button_options.row(align=True)
+
+        #       (I) Hide sketch
+        hide_sketch_checkbox = hide_scale_row.column()
+
+        hide_sketch_checkbox.enabled = are_cities_in_list
+        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
+
+        #       (J) Scale sketch
+        # TODO: Either use the cast modifier or geometry nodes in 2.92
 
         # (L) Generate City Group Box
         generate_city_group_box = panel_column.box()
@@ -225,7 +252,7 @@ class CVB_OT_NewSketch(Operator):
 
     def execute(self, context):
         # Make a new sketch
-        bpy.ops.mesh.primitive_cube_add()
+        bpy.ops.mesh.primitive_plane_add(size=50)
 
         return {"FINISHED"}
 
