@@ -39,7 +39,7 @@ class CVB_PanelProperties(PropertyGroup):
     city_field_prop: StringProperty(
         name="",
         default=city_name_string,
-        description="""City Name""",
+        description="""city Name""",
         update=None
     )
 
@@ -53,21 +53,19 @@ class CVB_PanelProperties(PropertyGroup):
         description="""Custom sketch variant""",
         default=0, min=0, max=999)
 
-    sketch_name_list = [
-        ('new_sketch', "New", "New Sketch", 'PLUS', 99)
-    ]
+    sketch_name_list = []
 
     sketch_name_prop: EnumProperty(
         name="",
         description="""Names of city sketches""",
-        default='new_sketch',
+        default=None,
         items=sketch_name_list,
         update=update_sketch_name)
 
     sketch_visible_prop: BoolProperty(
         name="Sketch Visibility",
-        description="""Toggle Sketch Visibility""" if len(sketch_name_list) > 1 else "Inactive until New Sketch",
-        default=True if len(sketch_name_list) > 1 else False,
+        description="""Toggle Sketch Visibility""" if len(sketch_name_list) > 0 else "Inactive until New Sketch",
+        default=True if len(sketch_name_list) > 0 else False,
         update=update_sketch_visibility)
 
     sketch_x_prop: IntProperty(

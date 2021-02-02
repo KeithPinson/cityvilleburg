@@ -19,14 +19,14 @@ from .src.addon.preferences import cvb_addon_register, cvb_addon_unregister
 from .src.addon.preferences import CVB_AddonPreferences
 from .src.panel.n_key_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
 from .src.panel.n_key_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
-from .src.panel.n_key_panel import CVB_OT_NewSketch
+from .src.panel.panel_ops import CVB_OT_NewSketch
 from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
 
 
 bl_info = {
     "name": "CITYVILLEBURG",
     "author": "KeithPinson",
-    "description": "A City Generator, version  zero.0",
+    "description": "A city Generator, version  zero.0",
     "blender": (2, 91, 0),
     "version": (0, 0, 1),
     "location": "View3D > N-Key-Panel",

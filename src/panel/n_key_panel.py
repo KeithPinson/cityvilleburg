@@ -1,4 +1,4 @@
-"""City Generator N-Key-Panel """
+"""city Generator N-Key-Panel """
 #
 # The main interface to the city generator. This is
 # where the buttons and controls are to sketch the
@@ -35,7 +35,7 @@ class CVB_PT_Main(Panel):
     #       (1) Sketch
     #       (2) Map
     #       (3) Terrain
-    #       (4) City
+    #       (4) city
     #
     #   A sketch is used to make a map. A map and terrain combine to make a city.
     #   Cities which are composed of many parts can be manipulated to effect the
@@ -45,17 +45,17 @@ class CVB_PT_Main(Panel):
     #
     #       Sketch Options:
     #
-    #           (C) City Name Drop-Down Box
+    #           (C) city Name Drop-Down Box
     #
-    #               - City names are displayed
+    #               - city names are displayed
     #
     #               - Drop down is disabled if no city names
     #
     #               - If city name is selected seed, type, size are updated
     #
-    #           (D) City Name Field
+    #           (D) city Name Field
     #
-    #               - Default City name is "City" <seed> "_" <type> <size> <variant>
+    #               - Default city name is "city" <seed> "_" <type> <size> <variant>
     #
     #                 Where:
     #                       <seed> is integer
@@ -96,10 +96,10 @@ class CVB_PT_Main(Panel):
     #                 shortest dimension to 10 Meters
     #
 
-    # (L) Generate City Group Box
+    # (L) Generate city Group Box
     #     -----------------------
     #
-    #   (M) Generate City Button
+    #   (M) Generate city Button
 
     def draw(self, context):
         cvb = context.scene.CVB
@@ -116,20 +116,20 @@ class CVB_PT_Main(Panel):
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
-        are_cities_in_list = len(cvb.sketch_name_list) > 1
+        are_cities_in_list = len(cvb.sketch_name_list) > 0
 
         # New Map Options Box
         new_map_button_options = new_map_group_box.box()
 
-        #       City Name Entry Row
+        #       city Name Entry Row
         city_name_entry = new_map_button_options.row(align=True).box().row()
 
-        #           (C) City Name Drop Down
+        #           (C) city Name Drop Down
         city_name_dropdown = city_name_entry.column().split(factor=0.25)
         city_name_dropdown.enabled = are_cities_in_list
         city_name_dropdown.prop(cvb, "sketch_name_prop", text="", icon_only=True, icon='MESH_GRID')
 
-        #           (D) City Name Field
+        #           (D) city Name Field
         city_name_field = city_name_entry.column()
         city_name_field.enabled = False
         city_name_field.prop(cvb, "city_field_prop", text="")
@@ -165,14 +165,14 @@ class CVB_PT_Main(Panel):
         #       (J) Scale sketch
         # TODO: Either use the cast modifier or geometry nodes in 2.92
 
-        # (L) Generate City Group Box
+        # (L) Generate city Group Box
         generate_city_group_box = panel_column.box()
 
-        # (M) Generate City Button
+        # (M) Generate city Button
         generate_city_button = generate_city_group_box.row(align=True)
         generate_city_button.scale_y = 1.3
         generate_city_button.operator("object.gen_city",
-                                      text="Generate City",
+                                      text="Generate city",
                                       icon_value=cvb_icon(context, "icon-gen-city-l"))
 
 
@@ -229,30 +229,15 @@ class CVB_OT_NewMap(Operator):
 
 class CVB_OT_GenCity(Operator):
     # pylint: disable=invalid-name
-    """Generate City Button"""
+    """Generate city Button"""
     bl_idname = 'object.gen_city'
-    bl_label = 'Generate City'
+    bl_label = 'Generate city'
     bl_options = {"REGISTER", "UNDO"}
     bl_description = """Generate city from map"""
 
     def execute(self, context):
         # Generate the city
         bpy.ops.mesh.primitive_cube_add()
-
-        return {"FINISHED"}
-
-
-class CVB_OT_NewSketch(Operator):
-    # pylint: disable=invalid-name
-    """New Sketch Button"""
-    bl_idname = 'object.new_sketch'
-    bl_label = 'New'
-    bl_options = {"REGISTER", "UNDO"}
-    bl_description = """New city map sketch"""
-
-    def execute(self, context):
-        # Make a new sketch
-        bpy.ops.mesh.primitive_plane_add(size=50)
 
         return {"FINISHED"}
 
