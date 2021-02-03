@@ -48,15 +48,20 @@ class CVB_AddonPreferences(AddonPreferences):
         preferences_column = self.layout.column()
 
         # Assets Folder Entry
-        assets_folder = preferences_column.box().column().split(factor=0.2)
+        assets_folder = preferences_column.box()
 
         #       Label
-        assets_folder_label = assets_folder
+        assets_folder_label = assets_folder.row().column().split(factor=0.2)
         assets_folder_label.label(text='Assets Folder')
 
         #       Field
-        assets_folder_field = assets_folder
+        assets_folder_field = assets_folder_label
         assets_folder_field.prop(self, 'cvb_asset_folder_prop', text='')
+
+        #       Instructions
+        assets_folder_text = assets_folder.row().column()
+        assets_folder_text.row().label(text="       This folder is used internally by the add-on and should only ")
+        assets_folder_text.row().label(text="       be changed if disk space is an issue.")
 
 
 def cvb_addon_register():

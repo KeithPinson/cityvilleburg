@@ -1,6 +1,6 @@
 """
 #
-# Copyright (c) Keith Pinson.
+# Copyright (c) 2021 Keith Pinson.
 #
 #  @see [[LICENSE]] file in the root directory of this source.
 #
@@ -25,11 +25,11 @@ from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
 
 bl_info = {
     "name": "CITYVILLEBURG",
-    "author": "KeithPinson",
-    "description": "A city Generator, version  zero.0",
+    "author": "Copyright (c) 2021 Keith Pinson",
+    "description": "A City Generator   (To start quickly, press shift-N and click the \"CVB\" tab)",
     "blender": (2, 91, 0),
     "version": (0, 0, 1),
-    "location": "View3D > N-Key-Panel",
+    "location": "View3D > N-key-Panel",
     "category": "Add Mesh",
     "support": "COMMUNITY",
     "warning": "This Add-on is under development. Use at this time is not advised.",
@@ -39,7 +39,7 @@ bl_info = {
 }
 
 
-# Make it clear where the output on the console for this addon begins
+# Make it clear in the console output where the output of this addon begins
 print("\n", f'''*** {bl_info['name']} ***''')
 
 # Ideally we should declare and define the hooks for the Blender
