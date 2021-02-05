@@ -14,7 +14,7 @@ class CVB_OT_NewSketch(Operator):
     bl_idname = 'object.new_sketch'
     bl_label = 'New'
     bl_options = {"REGISTER", "UNDO"}
-    bl_description = """New city map sketch"""
+    bl_description = """Add a new City Map Sketch"""
 
     def execute(self, context):
         # Make a new sketch

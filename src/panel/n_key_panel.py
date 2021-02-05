@@ -35,7 +35,7 @@ class CVB_PT_Main(Panel):
     #       (1) Sketch
     #       (2) Map
     #       (3) Terrain
-    #       (4) city
+    #       (4) City
     #
     #   A sketch is used to make a map. A map and terrain combine to make a city.
     #   Cities which are composed of many parts can be manipulated to effect the
@@ -45,17 +45,17 @@ class CVB_PT_Main(Panel):
     #
     #       Sketch Options:
     #
-    #           (C) city Name Drop-Down Box
+    #           (C) City Name Drop-Down Box
     #
-    #               - city names are displayed
+    #               - City names are displayed
     #
     #               - Drop down is disabled if no city names
     #
     #               - If city name is selected seed, type, size are updated
     #
-    #           (D) city Name Field
+    #           (D) City Name Field
     #
-    #               - Default city name is "city" <seed> "_" <type> <size> <variant>
+    #               - Default city name is "City" <seed> "_" <type> <size> <variant>
     #
     #                 Where:
     #                       <seed> is integer
@@ -68,7 +68,7 @@ class CVB_PT_Main(Panel):
     #
     #           (E) New Button
     #
-    #               - Displayed name is added to city names
+    #               - Displayed name is added to City Names
     #
     #               - Name field is enabled and can be changed
     #
@@ -136,7 +136,7 @@ class CVB_PT_Main(Panel):
 
         #           (E) "+" button
         city_name_plus_button = city_name_entry.column()
-        city_name_plus_button.operator("object.new_sketch", text="", icon='PLUS')
+        city_name_plus_button.operator("object.new_sketch", text="", icon='ADD')
 
         #       (F) Seed
         # TODO: Set the seed value in the add-on preferences too
