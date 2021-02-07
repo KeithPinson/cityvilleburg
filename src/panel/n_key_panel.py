@@ -55,13 +55,14 @@ class CVB_PT_Main(Panel):
     #
     #           (D) City Name Field
     #
-    #               - Default city name is "City" <seed> "_" <type> <size> <variant>
+    #               - Default city name is "City" <seed> "_" <type> <size> <tile> <variant>
     #
     #                 Where:
     #                       <seed> is integer
     #                       <type> is 1 letter
     #                       <size> is X km integer, "x", Y km integer and for values less than 1 km
     #                                               meter integers followed by "m"
+    #                       <tile> is optional 5 decimal, leading zero integer, preceded by "-"
     #                       Optional <variant> is "." followed by 3 decimal incremental integer
     #
     #               - Editing name is disabled if no seed,type,size match
@@ -95,6 +96,13 @@ class CVB_PT_Main(Panel):
     #               - Toggle between the Map X,Y size and a proportion equivalent of the
     #                 shortest dimension to 10 Meters
     #
+    #           (K) Farm Tile Id Checkbox
+    #
+    #               - Sequential positive decimal number starting with zero
+    #
+    #               - Display tile distance in positive/negative, x and y offsets from tile zero
+    #
+    #               - Change Map to be square
 
     # (L) Generate city Group Box
     #     -----------------------
@@ -164,6 +172,23 @@ class CVB_PT_Main(Panel):
 
         #       (J) Scale sketch
         # TODO: Either use the cast modifier or geometry nodes in 2.92
+
+        #       (K) Farm? and Tile Id
+        tile_id_box = new_map_button_options.row(align=True).box()
+
+        tile_id_row = tile_id_box.row(align=True)
+
+        render_farm_checkbox = tile_id_row.column()
+        render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi file?")
+
+        tile_position = tile_id_row.column()
+        tile_position.enabled = False
+        tile_position.label(text="000:-003" if cvb.using_tile_id_prop else "")
+
+        if cvb.using_tile_id_prop:
+            tile_id_stepper = tile_id_box.row(align=True)
+            tile_id_stepper.prop(cvb, "tile_id_prop", text="Tile #")
+
 
         # (L) Generate city Group Box
         generate_city_group_box = panel_column.box()

@@ -22,24 +22,40 @@ class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """Panel properties saved to the blend file"""
 
+    def city_name_postfix(self, context):
+        """<seed> "_" <type> <size> <tile> <variant>"""
+
+        cvb = context.scene.CVB
+
+        postfix = cvb.seed_prop
+        postfix = postfix + "-"
+        postfix = postfix + "g"
+        postfix = postfix + "1x1"
+        postfix = postfix + "00000" if cvb.using_tile_id_prop else ""
+        postfix = postfix + ""
+
+        return postfix
+
     def modify_sketch_size(self, context):
         """max map size"""
         return 1000
 
     def update_sketch_name(self, context):
         """Combo name, seed, variant"""
-        return "City1"
+        return context.scene.CVB.city_field_prop + self.city_name_postfix(context)
 
     def update_sketch_visibility(self, context):
         """Toggle visibility of sketch layer"""
         return True
 
-    city_name_string = "City1_g1x1"
+    def update_tile_id(self, context):
+        """Impacts the file name """
+        return 0
 
     city_field_prop: StringProperty(
         name="",
-        default=city_name_string,
-        description="""city Name""",
+        default="city",
+        description="""City Name""",
         update=None
     )
 
@@ -98,6 +114,18 @@ class CVB_PanelProperties(PropertyGroup):
         description="""Style hint that affects map sketch""",
         default='grid',
         items=sketch_style_list)
+
+    tile_id_prop: IntProperty(
+        name="",
+        description="""Unique ID of tile""",
+        default=0, min=0, max=32_767,
+        update=update_tile_id)
+
+    using_tile_id_prop: BoolProperty(
+        name="Multi-file Renders",
+        description="""Check to facilitate rendering across multiple files for a single city""",
+        default=False)
+
 
 
 def cvb_panel_register():
