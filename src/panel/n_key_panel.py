@@ -158,8 +158,13 @@ class CVB_PT_Main(Panel):
 
         #       (H) Map X,Y
         sketch_x_y = new_map_button_options.row(align=True)
-        sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
-        sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
+        if cvb.using_tile_id_prop:
+            sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="X")
+            sketch_x_y.label(text="", icon='LINKED')
+            sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="Y")
+        else:
+            sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
+            sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
         #       Hide/Scale Row
         hide_scale_row = new_map_button_options.row(align=True)
@@ -179,11 +184,11 @@ class CVB_PT_Main(Panel):
         tile_id_row = tile_id_box.row(align=True)
 
         render_farm_checkbox = tile_id_row.column()
-        render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi file?")
+        render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi tile?")
 
         tile_position = tile_id_row.column()
         tile_position.enabled = False
-        tile_position.label(text="000:-003" if cvb.using_tile_id_prop else "")
+        tile_position.prop(cvb, "tile_position_prop", text="")
 
         if cvb.using_tile_id_prop:
             tile_id_stepper = tile_id_box.row(align=True)

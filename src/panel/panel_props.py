@@ -61,7 +61,7 @@ class CVB_PanelProperties(PropertyGroup):
 
     seed_prop: IntProperty(
         name="Seed",
-        description="""Reproducible random sketch""",
+        description="""Reproducible random sketch id""",
         default=1, min=1, max=32_767)
 
     sketch_variant_prop: IntProperty(
@@ -84,9 +84,18 @@ class CVB_PanelProperties(PropertyGroup):
         default=True if len(sketch_name_list) > 0 else False,
         update=update_sketch_visibility)
 
+    sketch_xy_linked_prop: IntProperty(
+        name="Sketch XY",
+        description="""Sketch XY size""",
+        min=1,
+        max=10_000,
+        step=100,
+        default=1000,
+        update=modify_sketch_size)
+
     sketch_x_prop: IntProperty(
         name="Sketch X",
-        description="""Sketch X""",
+        description="""Sketch X size""",
         min=1,
         max=10_000,
         step=100,
@@ -95,7 +104,7 @@ class CVB_PanelProperties(PropertyGroup):
 
     sketch_y_prop: IntProperty(
         name="Sketch Y",
-        description="""Sketch Y""",
+        description="""Sketch Y size""",
         min=1,
         max=10_000,
         step=100,
@@ -120,6 +129,11 @@ class CVB_PanelProperties(PropertyGroup):
         description="""Unique ID of tile""",
         default=0, min=0, max=32_767,
         update=update_tile_id)
+
+    tile_position_prop: StringProperty(
+        name="",
+        description="""Matrix position from central tile""",
+        default="+000 +003")
 
     using_tile_id_prop: BoolProperty(
         name="Multi-file Renders",
