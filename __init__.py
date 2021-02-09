@@ -26,7 +26,7 @@ from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
 bl_info = {
     "name": "CITYVILLEBURG",
     "author": "Copyright (c) 2021 Keith Pinson",
-    "description": "A City Generator   (To start quickly, press shift-N and click the \"CVB\" tab)",
+    "description": "A City Generator   (To start quickly, press n key and click the \"CVB\" tab)",
     "blender": (2, 91, 0),
     "version": (0, 0, 1),
     "location": "View3D > N-key-Panel",

@@ -17,22 +17,26 @@ from bpy.types import PropertyGroup
 from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
 
+cvb_vals = {"cityfile": "", "city": ""}
 
 class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """Panel properties saved to the blend file"""
 
-    def city_name_postfix(self, context):
+    def city_name_postfix(self):
         """<seed> "_" <type> <size> <tile> <variant>"""
 
-        cvb = context.scene.CVB
+        v_type = "g"
+        v_size = "1x1"
+        v_tile = ""
+        v_variant = ""
 
-        postfix = cvb.seed_prop
-        postfix = postfix + "-"
-        postfix = postfix + "g"
-        postfix = postfix + "1x1"
-        postfix = postfix + "00000" if cvb.using_tile_id_prop else ""
-        postfix = postfix + ""
+        postfix = """{seed}-{type}{size}{tile}{vari}""".format(
+            seed=self.seed_prop,
+            type=v_type,
+            size=v_size,
+            tile=v_tile,
+            vari=v_variant)
 
         return postfix
 
@@ -42,7 +46,7 @@ class CVB_PanelProperties(PropertyGroup):
 
     def update_sketch_name(self, context):
         """Combo name, seed, variant"""
-        return context.scene.CVB.city_field_prop + self.city_name_postfix(context)
+        return context.scene.CVB.city_name_field_prop + self.city_name_postfix()
 
     def update_sketch_visibility(self, context):
         """Toggle visibility of sketch layer"""
@@ -52,11 +56,72 @@ class CVB_PanelProperties(PropertyGroup):
         """Impacts the file name """
         return 0
 
-    city_field_prop: StringProperty(
+    city_name = "city"
+    city_filename = "city1_g1x1"
+    city_name_number = 0
+
+    def city_name_get(self):
+        """city_name_field_prop get callback"""
+        # Do not call self.city_name_field_prop inside this callback, it
+        # will cause runaway recursion
+        name = cvb_vals["city"]
+
+        if( len(name) < 1 ): name = self.city_name
+
+        print("type:", bpy.context.area.type)
+
+        if( bpy.context.active_operator != None ):
+            print("operator:", bpy.context.active_operator.name, bpy.context.active_operator.bl_idname)
+
+        print("edit_object:", bpy.context.edit_object)
+        # print("edit_text:", bpy.context.edit_text)
+        print("region type:", bpy.context.region.type)
+
+        print("get: city_name() ==> ", name)
+
+        return name
+
+    def city_name_set(self, name):
+        """city_name_field_prop set callback"""
+        #self.city_name = name
+        # self.city_field_prop = name
+
+        cvb_vals["city"] = name
+        cvb_vals["cityfile"] = name + self.city_name_postfix()
+
+        self.city_filename_prop = name + self.city_name_postfix()
+
+        print("set: city_name (", name, ")", self.city_name, self.city_name_field_prop)
+
+    def city_name_update(self, context):
+        """city_name_field_prop update callback"""
+        # Do not set self.city_name_field_prop inside this callback, it
+        # will cause runaway recursion
+        name = self.city_name_field_prop
+
+        if( len(name) < 1 ): name = self.city_name
+
+        cvb_vals["city"] = name
+        cvb_vals["cityfile"] = name + self.city_name_postfix()
+        self.city_filename_prop = "CVB – " + cvb_vals["cityfile"]
+
+
+    city_filename_prop: StringProperty(
+        name="",
+        description="""Recommended city filename""",
+        default="Cityvilleburg")
+        # default="")
+
+    city_name_field_prop: StringProperty(
         name="",
         default="city",
         description="""City Name""",
-        update=None
+        # get=city_name_get,
+        # set=city_name_set,
+        # options={'ANIMATABLE', 'TEXTEDIT_UPDATE'},
+        subtype='FILE_NAME',
+        maxlen=28,
+        update=city_name_update
     )
 
     seed_prop: IntProperty(

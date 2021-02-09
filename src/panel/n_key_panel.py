@@ -21,11 +21,19 @@ from ..addon.preferences import cvb_icon
 class CVB_PT_Main(Panel):
     # pylint: disable=invalid-name
     """Main Panel of the N-Key Panels"""
-    bl_label = 'Cityvilleburg'
+    bl_label = ''  # Leave blank and use draw_header()
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'CVB'
     bl_order = 1
+
+    def draw_header(self, context):
+        layout = self.layout
+        header_row = layout.column()
+        header_row.alignment = 'CENTER'
+        header_row.use_property_decorate = True
+        header_row.prop(context.scene.CVB, "city_filename_prop", text="", emboss=False)
+
 
     # (A) New Map Group Box
     #     -----------------
@@ -139,8 +147,8 @@ class CVB_PT_Main(Panel):
 
         #           (D) city Name Field
         city_name_field = city_name_entry.column()
-        city_name_field.enabled = False
-        city_name_field.prop(cvb, "city_field_prop", text="")
+        # city_name_field.enabled = False
+        city_name_field.prop(cvb, "city_name_field_prop", text="")
 
         #           (E) "+" button
         city_name_plus_button = city_name_entry.column()
@@ -186,9 +194,10 @@ class CVB_PT_Main(Panel):
         render_farm_checkbox = tile_id_row.column()
         render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi tile?")
 
-        tile_position = tile_id_row.column()
-        tile_position.enabled = False
-        tile_position.prop(cvb, "tile_position_prop", text="")
+        if cvb.using_tile_id_prop:
+            tile_position = tile_id_row.column()
+            tile_position.enabled = False
+            tile_position.prop(cvb, "tile_position_prop", text="")
 
         if cvb.using_tile_id_prop:
             tile_id_stepper = tile_id_box.row(align=True)
