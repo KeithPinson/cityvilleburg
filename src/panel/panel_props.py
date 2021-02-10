@@ -17,7 +17,7 @@ from bpy.types import PropertyGroup
 from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
 
-cvb_vals = {"cityfile": "", "city": ""}
+cvb_vals = {"cityFile": "", "city": ""}
 
 class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name
@@ -56,69 +56,30 @@ class CVB_PanelProperties(PropertyGroup):
         """Impacts the file name """
         return 0
 
-    city_name = "city"
-    city_filename = "city1_g1x1"
-    city_name_number = 0
-
-    def city_name_get(self):
-        """city_name_field_prop get callback"""
-        # Do not call self.city_name_field_prop inside this callback, it
-        # will cause runaway recursion
-        name = cvb_vals["city"]
-
-        if( len(name) < 1 ): name = self.city_name
-
-        print("type:", bpy.context.area.type)
-
-        if( bpy.context.active_operator != None ):
-            print("operator:", bpy.context.active_operator.name, bpy.context.active_operator.bl_idname)
-
-        print("edit_object:", bpy.context.edit_object)
-        # print("edit_text:", bpy.context.edit_text)
-        print("region type:", bpy.context.region.type)
-
-        print("get: city_name() ==> ", name)
-
-        return name
-
-    def city_name_set(self, name):
-        """city_name_field_prop set callback"""
-        #self.city_name = name
-        # self.city_field_prop = name
-
-        cvb_vals["city"] = name
-        cvb_vals["cityfile"] = name + self.city_name_postfix()
-
-        self.city_filename_prop = name + self.city_name_postfix()
-
-        print("set: city_name (", name, ")", self.city_name, self.city_name_field_prop)
-
     def city_name_update(self, context):
-        """city_name_field_prop update callback"""
-        # Do not set self.city_name_field_prop inside this callback, it
+        """city_name_prop update callback"""
+        # Do not set self.city_name_prop inside this callback, it
         # will cause runaway recursion
-        name = self.city_name_field_prop
+        name = self.city_name_prop
 
-        if( len(name) < 1 ): name = self.city_name
+        if len(name) < 1:
+            name = "city"
 
         cvb_vals["city"] = name
-        cvb_vals["cityfile"] = name + self.city_name_postfix()
-        self.city_filename_prop = "CVB – " + cvb_vals["cityfile"]
+        cvb_vals["cityFile"] = name + self.city_name_postfix()
+        self.city_filename_prop = "CVB – " + cvb_vals["cityFile"]
 
 
     city_filename_prop: StringProperty(
         name="",
         description="""Recommended city filename""",
         default="Cityvilleburg")
-        # default="")
 
-    city_name_field_prop: StringProperty(
+    city_name_prop: StringProperty(
         name="",
         default="city",
         description="""City Name""",
-        # get=city_name_get,
-        # set=city_name_set,
-        # options={'ANIMATABLE', 'TEXTEDIT_UPDATE'},
+        # We do NOT want options={'TEXTEDIT_UPDATE'}
         subtype='FILE_NAME',
         maxlen=28,
         update=city_name_update
@@ -176,11 +137,12 @@ class CVB_PanelProperties(PropertyGroup):
         default=1000,
         update=modify_sketch_size)
 
+    # First letter of first element must be unique (it is used in city filename)
     sketch_style_list = [
-        ('grid', "Chicago Grid", "A city map modeled after the American grid system"),
-        ('skyscrapers', "Cyber Scrapers", "A city map modeled on the if you can't build out, build up"),
-        ('western', "Dodge 1880", "A town map with a main street"),
-        ('medieval', "Nordingenton", "A layout from years ago when cities formed inside a defensive wall")
+        ('grid', "Chicago style grid", "A city map modeled after the American grid system"),
+        ('skyscrapers', "Cyber sky scrapers", "A city map modeled on the if you can't build out, build up"),
+        ('western', "Dodge city style - 1880", "A town map with a main street"),
+        ('medieval', "Nordingen walled city style", "A layout from years ago when cities formed inside a defensive wall")
     ]
 
     sketch_style_prop: EnumProperty(
@@ -202,9 +164,8 @@ class CVB_PanelProperties(PropertyGroup):
 
     using_tile_id_prop: BoolProperty(
         name="Multi-file Renders",
-        description="""Check to facilitate rendering across multiple files for a single city""",
+        description="""Facilitates rendering across multiple files for one   single city""",
         default=False)
-
 
 
 def cvb_panel_register():

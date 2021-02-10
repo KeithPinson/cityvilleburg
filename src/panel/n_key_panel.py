@@ -128,7 +128,7 @@ class CVB_PT_Main(Panel):
         # (B) New Map Button
         new_map_button = new_map_group_box.row(align=True)
         new_map_button.scale_y = 1.3
-        new_map_button.operator("object.new_map",
+        new_map_button.operator("object.new_map_button",
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
@@ -148,11 +148,13 @@ class CVB_PT_Main(Panel):
         #           (D) city Name Field
         city_name_field = city_name_entry.column()
         # city_name_field.enabled = False
-        city_name_field.prop(cvb, "city_name_field_prop", text="")
+
+        city_name_field.prop(cvb, "city_name_prop", text="")
+        # city_name_field.operator("entry.city_name_field", text="")
 
         #           (E) "+" button
         city_name_plus_button = city_name_entry.column()
-        city_name_plus_button.operator("object.new_sketch", text="", icon='ADD')
+        city_name_plus_button.operator("object.new_sketch_button", text="", icon='ADD')
 
         #       (F) Seed
         # TODO: Set the seed value in the add-on preferences too
@@ -210,7 +212,7 @@ class CVB_PT_Main(Panel):
         # (M) Generate city Button
         generate_city_button = generate_city_group_box.row(align=True)
         generate_city_button.scale_y = 1.3
-        generate_city_button.operator("object.gen_city",
+        generate_city_button.operator("object.gen_city_button",
                                       text="Generate city",
                                       icon_value=cvb_icon(context, "icon-gen-city-l"))
 
@@ -248,7 +250,7 @@ class CVB_PT_Help(Panel):
 class CVB_OT_NewMap(Operator):
     # pylint: disable=invalid-name
     """New Map Button"""
-    bl_idname = 'object.new_map'
+    bl_idname = 'object.new_map_button'
     bl_label = 'New Map'
     bl_options = {"REGISTER", "UNDO"}
     bl_description = """Create a new city map"""
@@ -269,7 +271,7 @@ class CVB_OT_NewMap(Operator):
 class CVB_OT_GenCity(Operator):
     # pylint: disable=invalid-name
     """Generate city Button"""
-    bl_idname = 'object.gen_city'
+    bl_idname = 'object.gen_city_button'
     bl_label = 'Generate city'
     bl_options = {"REGISTER", "UNDO"}
     bl_description = """Generate city from map"""
