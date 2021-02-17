@@ -32,7 +32,7 @@ class CVB_PT_Main(Panel):
         header_row = layout.column()
         header_row.alignment = 'CENTER'
         header_row.use_property_decorate = True
-        header_row.prop(context.scene.CVB, "city_filename_prop", text="", emboss=False)
+        header_row.prop(context.scene.CVB.city_props, "city_panel_header_prop", text="", emboss=False)
 
 
     # (A) New Map Group Box
@@ -53,17 +53,28 @@ class CVB_PT_Main(Panel):
     #
     #       Sketch Options:
     #
-    #           (C) City Name Drop-Down Box
+    #           (C) City Name Field
     #
-    #               - City names are displayed
+    #               - City Name as a simple string without the seed, size and other
+    #                 parameter. It is editable.
     #
-    #               - Drop down is disabled if no city names
+    #           (D) New Button
     #
-    #               - If city name is selected seed, type, size are updated
+    #               - Displayed name is added to City Names
     #
-    #           (D) City Name Field
+    #               - Name field is enabled and can be changed
     #
-    #               - Default city name is "City" <seed> "_" <type> <size> <tile> <variant>
+    #               - No variant until sketch itself is edited
+    #
+    #           (E) City Filename Drop-Down Box
+    #
+    #               - City filenames are displayed
+    #
+    #               - Drop down is disabled if no city filenames
+    #
+    #               - If city filename is selected seed, type, size are updated
+    #
+    #               - City filename is <cityname> <seed> "_" <type> <size> <tile> <variant>
     #
     #                 Where:
     #                       <seed> is integer
@@ -74,14 +85,6 @@ class CVB_PT_Main(Panel):
     #                       Optional <variant> is "." followed by 3 decimal incremental integer
     #
     #               - Editing name is disabled if no seed,type,size match
-    #
-    #           (E) New Button
-    #
-    #               - Displayed name is added to City Names
-    #
-    #               - Name field is enabled and can be changed
-    #
-    #               - No variant until sketch itself is edited
     #
     #           (F) Seed: A number used to make a reproducible random sketch
     #
@@ -138,23 +141,26 @@ class CVB_PT_Main(Panel):
         new_map_button_options = new_map_group_box.box()
 
         #       city Name Entry Row
-        city_name_entry = new_map_button_options.row(align=True).box().row()
+        city_name_entry = new_map_button_options.row(align=True).box()
 
-        #           (C) city Name Drop Down
-        city_name_dropdown = city_name_entry.column().split(factor=0.25)
-        city_name_dropdown.enabled = are_cities_in_list
-        city_name_dropdown.prop(cvb, "sketch_name_prop", text="", icon_only=True, icon='MESH_GRID')
-
-        #           (D) city Name Field
-        city_name_field = city_name_entry.column()
+        #           (C) City Name Field
+        city_name_field = city_name_entry.row(align=True)
         # city_name_field.enabled = False
+        city_name_field.prop(cvb.city_props, "city_name_prop", text="")
 
-        city_name_field.prop(cvb, "city_name_prop", text="")
-        # city_name_field.operator("entry.city_name_field", text="")
-
-        #           (E) "+" button
-        city_name_plus_button = city_name_entry.column()
+        #           (D) "+" button
+        city_name_plus_button = city_name_field
         city_name_plus_button.operator("object.new_sketch_button", text="", icon='ADD')
+
+        #       (E) City Filename Drop Down
+        city_filename_dropdown = city_name_entry.row().column()
+        city_filename_dropdown.enabled = are_cities_in_list
+        city_filename_dropdown.prop(
+            cvb,
+            "sketch_name_prop",
+            text="",
+            icon_only=False,
+            icon='MESH_GRID')
 
         #       (F) Seed
         # TODO: Set the seed value in the add-on preferences too

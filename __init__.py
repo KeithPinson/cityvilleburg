@@ -19,7 +19,7 @@ from .src.addon.preferences import cvb_addon_register, cvb_addon_unregister
 from .src.addon.preferences import CVB_AddonPreferences
 from .src.panel.n_key_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
 from .src.panel.n_key_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
-from .src.panel.panel_ops import CVB_OT_NewSketch
+from .src.panel.panel_ops import CVB_OT_NewSketch, CVB_OT_EditCityName
 from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
 
 
@@ -53,6 +53,7 @@ CLASS_REGISTRY = (
     CVB_OT_GenCity,
     CVB_OT_GettingStartedHelp,
     CVB_OT_NewSketch,
+    CVB_OT_EditCityName,
     CVB_PT_Main,
     CVB_PT_Help,
 )
