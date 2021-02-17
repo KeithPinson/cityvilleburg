@@ -16,7 +16,7 @@ import bpy
 from bpy.types import PropertyGroup
 from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
-from .cityname_props import CVB_CityNameProperties
+from .citysketchname_props import CVB_CityNameProperties
 
 
 # cvb_vals = {"cityFile": "", "city": ""}
@@ -46,10 +46,6 @@ class CVB_PanelProperties(PropertyGroup):
     def modify_sketch_size(self, context):
         """max map size"""
         return 1000
-
-    def update_sketch_name(self, context):
-        """Combo name, seed, variant"""
-        return context.scene.CVB.city_name_field_prop + self.city_name_postfix()
 
     def update_sketch_visibility(self, context):
         """Toggle visibility of sketch layer"""
@@ -98,19 +94,10 @@ class CVB_PanelProperties(PropertyGroup):
         description="""Custom sketch variant""",
         default=0, min=0, max=999)
 
-    sketch_name_list = []
-
-    sketch_name_prop: EnumProperty(
-        name="",
-        description="""Names of city sketches""",
-        default=None,
-        items=sketch_name_list,
-        update=update_sketch_name)
-
     sketch_visible_prop: BoolProperty(
         name="Sketch Visibility",
-        description="""Toggle Sketch Visibility""" if len(sketch_name_list) > 0 else "Inactive until New Sketch",
-        default=True if len(sketch_name_list) > 0 else False,
+        description="""Toggle Sketch Visibility""" if len(CVB_CityNameProperties.sketch_name_list) > 0 else "Inactive until New Sketch",
+        default=True if len(CVB_CityNameProperties.sketch_name_list) > 0 else False,
         update=update_sketch_visibility)
 
     sketch_xy_linked_prop: IntProperty(

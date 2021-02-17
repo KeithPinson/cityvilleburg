@@ -58,6 +58,8 @@ class CVB_PT_Main(Panel):
     #               - City Name as a simple string without the seed, size and other
     #                 parameter. It is editable.
     #
+    #               - It must be filename compatible
+    #
     #           (D) New Button
     #
     #               - Displayed name is added to City Names
@@ -66,17 +68,18 @@ class CVB_PT_Main(Panel):
     #
     #               - No variant until sketch itself is edited
     #
-    #           (E) City Filename Drop-Down Box
+    #           (E) Sketch Name Drop-Down Box
     #
-    #               - City filenames are displayed
+    #               - Sketch names are displayed
     #
-    #               - Drop down is disabled if no city filenames
+    #               - Drop down is disabled if no sketches available
     #
-    #               - If city filename is selected seed, type, size are updated
+    #               - If a sketch name is selected then city, seed, type, size are updated
     #
-    #               - City filename is <cityname> <seed> "_" <type> <size> <tile> <variant>
+    #               - Sketch name is <city> <seed> "_" <type> <size> <tile> <variant>
     #
     #                 Where:
+    #                       <city> is a filename compatible string including no spaces and not quoted
     #                       <seed> is integer
     #                       <type> is 1 letter
     #                       <size> is X km integer, "x", Y km integer and for values less than 1 km
@@ -135,7 +138,7 @@ class CVB_PT_Main(Panel):
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
-        are_cities_in_list = len(cvb.sketch_name_list) > 0
+        are_sketches_in_list = len(cvb.city_props.sketch_name_list) > 0
 
         # New Map Options Box
         new_map_button_options = new_map_group_box.box()
@@ -152,11 +155,11 @@ class CVB_PT_Main(Panel):
         city_name_plus_button = city_name_field
         city_name_plus_button.operator("object.new_sketch_button", text="", icon='ADD')
 
-        #       (E) City Filename Drop Down
-        city_filename_dropdown = city_name_entry.row().column()
-        city_filename_dropdown.enabled = are_cities_in_list
-        city_filename_dropdown.prop(
-            cvb,
+        #       (E) Sketch Name Drop Down
+        sketch_name_dropdown = city_name_entry.row().column()
+        sketch_name_dropdown.enabled = are_sketches_in_list
+        sketch_name_dropdown.prop(
+            cvb.city_props,
             "sketch_name_prop",
             text="",
             icon_only=False,
@@ -188,7 +191,7 @@ class CVB_PT_Main(Panel):
         #       (I) Hide sketch
         hide_sketch_checkbox = hide_scale_row.column()
 
-        hide_sketch_checkbox.enabled = are_cities_in_list
+        hide_sketch_checkbox.enabled = are_sketches_in_list
         hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
 
         #       (J) Scale sketch

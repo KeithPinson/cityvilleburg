@@ -20,9 +20,6 @@ class CVB_CityNameProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """City name / City filename properties"""
 
-    def __init__(self):
-        print("props")
-
     def city_name_postfix(self):
         """<seed> "_" <type> <size> <tile> <variant>"""
 
@@ -68,3 +65,17 @@ class CVB_CityNameProperties(PropertyGroup):
         name="",
         description="""City name""",
         default="Cityvilleburg")
+
+    def sketch_name_update(self, context):
+        """Combo name, seed, variant"""
+        return context.scene.CVB.city_name_field_prop + self.city_name_postfix()
+
+    sketch_name_list = []
+
+    sketch_name_prop: EnumProperty(
+        name="",
+        description="""Names of city sketches""",
+        default=None,
+        items=sketch_name_list,
+        update=sketch_name_update)
+
