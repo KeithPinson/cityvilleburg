@@ -27,10 +27,13 @@
 # Copyright (c) 2021 Keith Pinson
 
 import re
-import bpy
+
+
+# pylint: disable=too-many-arguments
 
 
 def format_city_name(city):
+    """Format the city name string for incorporating into Sketch Name string"""
     #
     # The string must:
     #
@@ -49,13 +52,11 @@ def format_city_name(city):
         t_city = t_city.strip("""\'""")
 
         # Remove <>:"/\|?* and _
-        t_city = re.sub("[<>:\"/\\\|?*]", "", t_city)
+        t_city = re.sub(r"[<>:\"/\\\|?*]", "", t_city)
 
         # Capitalize words and remove spaces
-        t_city = t_city.title()  # Underscores have to be removed first
+        t_city = t_city.title()  # Underscores have to be removed before calling this
         t_city = t_city.replace(" ", "")
-
-        # t_city = t_city.encode('ascii', 'ignore')  # This is probably overkill
 
     except TypeError:
         t_city = ""
@@ -66,6 +67,8 @@ def format_city_name(city):
 
 
 def convert_length_to_km_string(length):
+    """Convert length like 1000 to '1' or 30 to '30M'"""
+
     length_str = ""
 
     try:
@@ -82,79 +85,113 @@ def convert_length_to_km_string(length):
 
 
 def string_to_sketchname(sketchname_string):
+    # pylint: disable=line-too-long, invalid-name
+    """Parse Sketch Name string to get its components returned as a dict"""
 
     # The sketch name should have the following format:
     #
-    #     {city}{seed}_{style}{x}x{y}{tile}
+    #     {city}{seed}_{style}{x}x{y}{tile}{variant}
     #
-    #     Where the optional tile will have a leading hyphen character.
+    #     Where the optional tile will have a leading hyphen character, and
+    #     the variant (which may be blank if not added) will have a leading dot.
+    #
+    # -------------------------------------
+    #
+    # Can confirm on regex101.com
+    #
+    # /(?:(\w+)(?:(?:\#?)([\d]+)))_([a-zA-Z0-9])([^x]+)x([0-9]+M?)(?:(?:\-)([0-9]+))?(?:(?:.)([\d]{3}))?/gm
+    #
+    # City1_g1x1
+    # City1_g10x20
+    # City1_g30Mx30M
+    # City1_g1x1-00001
+    # City1_g10x20-00002
+    # City1_g30Mx30M-00003
+    # City1_g30Mx30M.001
+    # City1_g1x1-00001.002
+    # TauCeti5#1_g30Mx30M.001
+    # TauCeti5#1_g1x1-00001.002
+    #
 
     sketch_name_record = None
 
-    # First break the string at the underscore into a,b halves
-    a, b = sketchname_string.split('_')
+    # Regex that captures the format as described above, resulting in:
+    #    city, seed, style, x, y, tile, variant
+    rex = r"""(?:(\w+)(?:(?:\#?)([\d]+)))_([a-zA-Z0-9])([^x]+)x([0-9]+M?)(?:(?:\-)([0-9]+))?(?:(?:.)([\d]{3}))?"""
 
-    # Handle the case where the city name ends in with a number
-    pos = str(a).find('#')
+    m = re.match(rex, sketchname_string)
 
-    if pos < 0:
-        m = re.match("([^\d]+)([\d]+)", a)
-        city, seed = m.groups()
-    else:
-        # The city and seed were delimited with a hash symbol
-        city, seed = a.split('#')
+    if m is not None:
+        city, seed, style, x, y, tile, variant = m.groups()
 
-    m = re.match("([a-zA-Z0-9])([^x]+)x([0-9]+M?)(\-[0-9]+)?", b)
-    style, x, y, tile = m.groups()
+        if tile is None:
+            tile = ""
 
-    if tile is not None:
-        tile.lstrip('-')
-
-    sketchname = build_sketchname_string(city, seed, style, x, y, tile)
-
-    if len(sketchname) > 0:
+        if variant is None:
+            variant = 0
 
         sketch_name_record = {
-            "sketch_name": sketchname,
+            "sketch_name": sketchname_string,
             "city": city,
             "seed": seed,
             "style": style,
             "x": x,
             "y": y,
             "tile": tile,
-            "variant": 0
+            "variant": variant
         }
 
     return sketch_name_record
 
 
 def sketchname_to_string(sketchname):
+    """Extract the Sketch Name string and return it"""
+
     sketch_name_string = ""
 
-    try:
-        if len(sketchname['sketchname_name']) > 0:
-            sketch_name_string = sketchname['sketchname']
-    except ValueError:
-        sketch_name_string = ""
+    if sketchname is not None:
+        try:
+            if len(sketchname['sketch_name']) > 0:
+                sketch_name_string = sketchname['sketch_name']
+        except KeyError:
+            sketch_name_string = ""
 
     return sketch_name_string
 
 
-def build_sketchname_string(city, seed, style, x, y, tile=""):
+def build_sketchname_string(city, seed, style, x, y, tile="", variant=0):
+    # pylint: disable=invalid-name, too-many-locals
+    """From the parameters build and return the Sketch Name string"""
+
     sketch_name = ""
 
-    # The tile needs to either be an empty string or a zero-filled
-    # numeric string preceded by a dash
-    t_tile = tile
+    # The tile needs to either be an empty string or a zero-filled,
+    # five digit, numeric string preceded by a dash (-)
+    t_tile = ""
 
     if tile != "":
         try:
             v = int(tile.lstrip('-'))
-            tile = "-" + str(v).zfill(5)
+            t_tile = "-" + str(v).zfill(5)
         except ValueError:
-            tile = ""
+            t_tile = ""
 
-    # A filename compatible city name string could be quoted and contain spaces
+    # Variant needs to either be an empty string or a zero-filled,
+    # three digit, numeric string preceded by a dot (.)
+    t_variant = ""
+
+    try:
+        v = int(variant)
+
+        if v > 0:
+            t_variant = "." + str(v).zfill(3)
+
+    except ValueError:
+        t_variant = ""
+
+    # If subtype='FILE_NAME' was used with the StringProperty we should be
+    # passed a filename compatible string, however we still may need to remove
+    # quoting and spaces, so we will format the string making no assumptions
     t_city = format_city_name(city)
 
     # We don't really do anything with the seed
@@ -174,69 +211,22 @@ def build_sketchname_string(city, seed, style, x, y, tile=""):
        len(t_x) > 0 and
        len(t_y) > 0):
 
-        # We'll had a # character if the city name ends in a number
+        # We'll add a # character if the city name ends in a number
         last_letter = t_city[-1:]
-        if last_letter.isnumeric:
+        if last_letter.isnumeric():
             t_city = t_city + "#"
 
         # Example: city1_g1x1
-        sketch_name = """{city}{seed}_{style}{x}x{y}{tile}""". \
-            format(city=t_city, seed=t_seed, style=t_style, x=t_x, y=t_y, tile=t_tile)
+        sketch_name = """{city}{seed}_{style}{x}x{y}{tile}{variant}""". \
+            format(
+                city=t_city,
+                seed=t_seed,
+                style=t_style,
+                x=t_x,
+                y=t_y,
+                tile=t_tile,
+                variant=t_variant)
 
     return sketch_name
 
-
-def get_variant_from_string():
-    variant = None
-
-    return variant
-
-
-def add_variant_to_string(sketchname_string, variant):
-    result_string = ""
-    variant_string = ""
-
-    try:
-        variant = int(variant)
-
-        if 0 < variant < 1000:
-            variant_string = str(variant)
-
-    except ValueError:
-        variant_string = ""
-
-    if (validate_sketchname_string(sketchname_string) and
-            len(variant_string) > 0):
-        result_string = sketchname_string + "." + variant_string
-
-    return result_string
-
-
-def trim_variant_from_string():
-    sketch_name_string = ""
-
-    return sketch_name_string
-
-
-def validate_sketchname_string(sketchname_string):
-    record = string_to_sketchname(sketchname_string)
-
-    return record is not None
-
-
-def city_name_postfix(self):
-    """<seed> "_" <type> <size> <tile> <variant>"""
-
-    v_type = "g"
-    v_size = "1x1"
-    v_tile = ""
-    v_variant = ""
-
-    postfix = """{seed}_{type}{size}{tile}{vari}""".format(
-        seed=1,  # self.seed_prop,
-        type=v_type,
-        size=v_size,
-        tile=v_tile,
-        vari=v_variant)
-
-    return postfix
+# pylint: enable=too-many-arguments
