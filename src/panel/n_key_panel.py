@@ -82,10 +82,12 @@ class CVB_PT_Main(Panel):
     #                       <city> is a filename compatible string including no spaces and not quoted
     #                       <seed> is integer
     #                       <type> is 1 letter
-    #                       <size> is X km integer, "x", Y km integer and for values less than 1 km
-    #                                               meter integers followed by "m"
+    #                       <size> is XxY, where X and Y are kilometers expressed as integers,
+    #                              or for values less than 1 km, meters express as integers
+    #                              followed by the letter "m"
     #                       <tile> is optional 5 decimal, leading zero integer, preceded by "-"
-    #                       Optional <variant> is "." followed by 3 decimal incremental integer
+    #                       <variant> is "." followed by 3 decimal incremental integer starting
+    #                                 with 001
     #
     #               - Editing name is disabled if no seed,type,size match
     #
@@ -110,20 +112,21 @@ class CVB_PT_Main(Panel):
     #               - Toggle between the Map X,Y size and a proportion equivalent of the
     #                 shortest dimension to 10 Meters
     #
-    #           (K) Farm Tile Id Checkbox
+    #           (K) Tile Id Checkbox
     #
     #               - Sequential positive decimal number starting with zero
     #
     #               - Display tile distance in positive/negative, x and y offsets from tile zero
     #
     #               - Change Map to be square
-
+    #
     # (L) Generate city Group Box
     #     -----------------------
     #
     #   (M) Generate city Button
 
     def draw(self, context):
+
         cvb = context.scene.CVB
 
         panel_column = self.layout
@@ -138,7 +141,8 @@ class CVB_PT_Main(Panel):
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
-        are_sketches_in_list = len(cvb.city_props.sketch_name_list) > 0
+        are_sketches_in_list = cvb.city_props.sketch_names_count_prop > 0
+        are_sketches_in_list = True
 
         # New Map Options Box
         new_map_button_options = new_map_group_box.box()
@@ -148,11 +152,10 @@ class CVB_PT_Main(Panel):
 
         #           (C) City Name Field
         city_name_field = city_name_entry.row(align=True)
-        # city_name_field.enabled = False
         city_name_field.prop(cvb.city_props, "city_name_prop", text="")
 
         #           (D) "+" button
-        city_name_plus_button = city_name_field
+        city_name_plus_button = city_name_field.split()
         city_name_plus_button.operator("object.new_sketch_button", text="", icon='ADD')
 
         #       (E) Sketch Name Drop Down
@@ -197,7 +200,7 @@ class CVB_PT_Main(Panel):
         #       (J) Scale sketch
         # TODO: Either use the cast modifier or geometry nodes in 2.92
 
-        #       (K) Farm? and Tile Id
+        #       (K) Tile Id
         tile_id_box = new_map_button_options.row(align=True).box()
 
         tile_id_row = tile_id_box.row(align=True)
