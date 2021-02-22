@@ -16,32 +16,12 @@ import bpy
 from bpy.types import PropertyGroup
 from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
-from .citysketchname_props import CVB_CityNameProperties
-
-
-# cvb_vals = {"cityFile": "", "city": ""}
+from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
 
 
 class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """Panel properties saved to the blend file"""
-
-    # def city_name_postfix(self):
-    #     """<seed> "_" <type> <size> <tile> <variant>"""
-    #
-    #     v_type = "g"
-    #     v_size = "1x1"
-    #     v_tile = ""
-    #     v_variant = ""
-    #
-    #     postfix = """{seed}-{type}{size}{tile}{vari}""".format(
-    #         seed=self.seed_prop,
-    #         type=v_type,
-    #         size=v_size,
-    #         tile=v_tile,
-    #         vari=v_variant)
-    #
-    #     return postfix
 
     def modify_sketch_size(self, context):
         """max map size"""
@@ -55,34 +35,9 @@ class CVB_PanelProperties(PropertyGroup):
         """Impacts the file name """
         return 0
 
-    # def city_name_update(self, context):
-    #     """city_name_prop update callback"""
-    #     # Do not set self.city_name_prop inside this callback, it
-    #     # will cause runaway recursion
-    #     name = self.city_name_prop
-    #
-    #     if len(name) < 1:
-    #         name = "city"
-    #
-    #     cvb_vals["city"] = name
-    #     cvb_vals["cityFile"] = name + self.city_name_postfix()
-    #     self.city_filename_prop = "CVB – " + cvb_vals["cityFile"]
-    #
-    #
-    # city_filename_prop: StringProperty(
-    #     name="",
-    #     description="""Recommended city filename""",
-    #     default="Cityvilleburg")
-    #
-    # city_name_prop: StringProperty(
-    #     name="",
-    #     default="city",
-    #     description="""City Name""",
-    #     # We do NOT want options={'TEXTEDIT_UPDATE'}
-    #     subtype='FILE_NAME',
-    #     maxlen=28,
-    #     update=city_name_update
-    # )
+    # sketch_names_prop: Pointer
+
+    city_props: PointerProperty(type=CVB_CityNameProperties)
 
     seed_prop: IntProperty(
         name="Seed",
@@ -96,8 +51,8 @@ class CVB_PanelProperties(PropertyGroup):
 
     sketch_visible_prop: BoolProperty(
         name="Sketch Visibility",
-        description="""Toggle Sketch Visibility""" if len(CVB_CityNameProperties.sketch_name_list) > 0 else "Inactive until New Sketch",
-        default=True if len(CVB_CityNameProperties.sketch_name_list) > 0 else False,
+        description="""Toggle Sketch Visibility""" if not is_sketch_list_empty() else "Inactive until New Sketch",
+        default=True if not is_sketch_list_empty() else False,
         update=update_sketch_visibility)
 
     sketch_xy_linked_prop: IntProperty(
@@ -129,10 +84,10 @@ class CVB_PanelProperties(PropertyGroup):
 
     # First letter of first element must be unique (it is used in city filename)
     sketch_style_list = [
-        ('grid', "Chicago style grid", "A city map modeled after the American grid system"),
-        ('skyscrapers', "Cyber sky scrapers", "A city map modeled on the if you can't build out, build up"),
-        ('western', "Dodge city style - 1880", "A town map with a main street"),
-        ('medieval', "Nordingen walled city style", "A layout from years ago when cities formed inside a defensive wall")
+        ('grid', "Grid Style City", "A city map modeled after the American grid system"),
+        ('medieval', "Medieval City Style", "A layout from years ago when cities formed inside a defensive wall"),
+        ('skyscrapers', "Skyscraper City Style", "A city map modeled on the if you can't build out, build up"),
+        ('western', "Western City Style", "A town built along a thoroughfare; water, rail, or road")
     ]
 
     sketch_style_prop: EnumProperty(
@@ -156,8 +111,6 @@ class CVB_PanelProperties(PropertyGroup):
         name="Multi-file Renders",
         description="""Facilitates rendering across multiple files for one   single city""",
         default=False)
-
-    city_props: PointerProperty(type=CVB_CityNameProperties)
 
 
 def cvb_panel_register():
