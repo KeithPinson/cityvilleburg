@@ -1,4 +1,3 @@
-"""
 #
 # Copyright (c) 2021 Keith Pinson.
 #
@@ -11,7 +10,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""
+
+__doc__ = """A Blender addon for generating cities"""
+__name__ = "CITYVILLEBURG"
+
 
 from inspect import isclass
 from bpy.utils import register_class, unregister_class
@@ -47,7 +49,7 @@ print("\n", f'''*** {bl_info['name']} ***''')
 # which we can break the connections, we keep the class registry here
 # and then try to perform a simple verification test of class existence.
 
-CLASS_REGISTRY = (
+_CLASS_REGISTRY = (
     CVB_AddonPreferences,    # | Addon classes (keep at top)
     CVB_OT_NewMap,
     CVB_OT_GenCity,
@@ -71,7 +73,7 @@ def verify_classes(registry):
     return all_verified
 
 
-CLASSES_VERIFIED = verify_classes(CLASS_REGISTRY)
+_CLASSES_VERIFIED = verify_classes(_CLASS_REGISTRY)
 
 
 def register():
@@ -86,19 +88,19 @@ def register():
     cvb_panel_register()
 
     # Okay, load the remainder of the classes
-    for cls in CLASS_REGISTRY[1:]:
+    for cls in _CLASS_REGISTRY[1:]:
         register_class(cls)
 
 
 def unregister():
     """Unregister the addon"""
 
-    for cls in reversed(CLASS_REGISTRY):
+    for cls in reversed(_CLASS_REGISTRY):
         unregister_class(cls)
 
     cvb_panel_unregister()
     cvb_addon_unregister()
 
 
-if CLASSES_VERIFIED and __name__ == "__main__":
+if _CLASSES_VERIFIED and __name__ == "__main__":
     register()
