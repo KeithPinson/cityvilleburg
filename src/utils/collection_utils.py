@@ -148,6 +148,7 @@ def collection_first_missing(path_string):
 
             if coll is None:
                 first_missing_found_at = i
+                break
 
     except KeyError:
         return -1
@@ -179,7 +180,7 @@ def collection_add(path_string):
     result = True
     for i in range(add_at, len(parts)):
 
-        new_node = new_collection_node(path_string,i)
+        new_node = new_collection_node(path_string, i)
 
         if not new_node:
             result = False
@@ -220,7 +221,7 @@ def new_collection_node(path_string, index):
     if parent_node and hasattr(parent_node, "children"):
         parent_coll = parent_node.children
 
-        if parent_coll and hasattr(parent_coll, "link"):
+        if parent_coll is not None and hasattr(parent_coll, "link"):
             new_node = bpy.data.collections.new(key)
 
             parent_coll.link(new_node)
