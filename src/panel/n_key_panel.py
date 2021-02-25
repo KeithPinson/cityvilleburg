@@ -1,4 +1,4 @@
-"""city Generator N-Key-Panel """
+"""City Generator N-Key-Panel """
 #
 # The main interface to the city generator. This is
 # where the buttons and controls are to sketch the
@@ -12,10 +12,7 @@
 import bpy
 from bpy.types import Panel, Operator
 from ..addon.preferences import cvb_icon
-
-
-#         column = layout.column(align=True)
-#         column.separator()
+from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
 
 
 class CVB_PT_Main(Panel):
@@ -32,7 +29,8 @@ class CVB_PT_Main(Panel):
         header_row = layout.column()
         header_row.alignment = 'CENTER'
         header_row.use_property_decorate = True
-        header_row.prop(context.scene.CVB.city_props, "city_panel_header_prop", text="", emboss=False)
+        header_row.prop(
+            context.scene.CVB.city_props, "city_panel_header_prop", text="", emboss=False)
 
 
     # (A) New Map Group Box
@@ -46,8 +44,9 @@ class CVB_PT_Main(Panel):
     #       (4) City
     #
     #   A sketch is used to make a map. A map and terrain combine to make a city.
-    #   Cities which are composed of many parts can be manipulated to effect the
-    #   map and the terrain. And, changing the map, changes the sketch.
+    #   Changes to any layer can have affects up and down the layers. Cities which
+    #   are composed of many parts can be manipulated to effect the map and the
+    #   terrain. And, changing the map, changes the sketch.
     #
     #   (B) New Map Button  (doubles as section title)
     #
@@ -79,7 +78,8 @@ class CVB_PT_Main(Panel):
     #               - Sketch name is <city> <seed> "_" <type> <size> <tile> <variant>
     #
     #                 Where:
-    #                       <city> is a filename compatible string including no spaces and not quoted
+    #                       <city> is a filename compatible string in addition:
+    #                              no underscores, no spaces, and not quoted
     #                       <seed> is integer
     #                       <type> is 1 letter
     #                       <size> is XxY, where X and Y are kilometers expressed as integers,
@@ -98,10 +98,18 @@ class CVB_PT_Main(Panel):
     #
     #           (G) Map Style Drop down
     #
-    #               "g" Chicago Grid    (A city map modeled after the American grid system)
-    #               "s" Cyber Scrapers  (A city map modeled on the if you can't build out, build up)
-    #               "h" Dodge 1880      (A town map with a main street)
-    #               "c" Nordingenton    (A layout from years ago when cities formed inside a defensive wall)
+    #               'grid'
+    #                   Grid Plan City
+    #                   (A city map modeled after the planned grid system)
+    #               'medieval'
+    #                   Medieval City Style
+    #                   (A layout from years ago when cities formed inside a defensive wall)
+    #               'skyscrapers'
+    #                   Skyscraper City Style
+    #                   (A city map modeled on the if you can't build out, build up)
+    #               'western'
+    #                   Western City Style
+    #                   (A town built along a thoroughfare; water, rail, or road)
     #
     #           (H) Map X: Size and Y: Size (in meter integers)
     #
@@ -126,10 +134,19 @@ class CVB_PT_Main(Panel):
     #   (M) Generate city Button
 
     def draw(self, context):
+        # pylint: disable=too-many-locals
+        """Draw the main N-key panel"""
+
+        #
+        # This is called everytime the mouse enter an element's border
+        #
 
         cvb = context.scene.CVB
 
         panel_column = self.layout
+
+        # Potentially a heavy call...might need to call it on another thread
+        cvb.city_props.refresh_sketch_list(cvb)
 
         # (A) New Map Group Box
         new_map_group_box = panel_column.box()
@@ -137,12 +154,11 @@ class CVB_PT_Main(Panel):
         # (B) New Map Button
         new_map_button = new_map_group_box.row(align=True)
         new_map_button.scale_y = 1.3
-        new_map_button.operator("object.new_map_button",
+        new_map_button.operator("cvb.new_map_button",
                                 text="New Map",
                                 icon_value=cvb_icon(context, "icon-new-map-l"))
 
-        are_sketches_in_list = cvb.city_props.sketch_names_count_prop > 0
-        are_sketches_in_list = True
+        are_sketches_in_list = not is_sketch_list_empty()
 
         # New Map Options Box
         new_map_button_options = new_map_group_box.box()
@@ -156,7 +172,7 @@ class CVB_PT_Main(Panel):
 
         #           (D) "+" button
         city_name_plus_button = city_name_field.split()
-        city_name_plus_button.operator("object.new_sketch_button", text="", icon='ADD')
+        city_name_plus_button.operator("cvb.new_sketch_button", text="", icon='ADD')
 
         #       (E) Sketch Name Drop Down
         sketch_name_dropdown = city_name_entry.row().column()
@@ -169,7 +185,6 @@ class CVB_PT_Main(Panel):
             icon='MESH_GRID')
 
         #       (F) Seed
-        # TODO: Set the seed value in the add-on preferences too
         # seed = cvb_prefs(context).cvb_seed
         seed_stepper = new_map_button_options.row(align=True)
         seed_stepper.prop(cvb, "seed_prop", text="Seed")
@@ -224,7 +239,7 @@ class CVB_PT_Main(Panel):
         # (M) Generate city Button
         generate_city_button = generate_city_group_box.row(align=True)
         generate_city_button.scale_y = 1.3
-        generate_city_button.operator("object.gen_city_button",
+        generate_city_button.operator("cvb.gen_city_button",
                                       text="Generate city",
                                       icon_value=cvb_icon(context, "icon-gen-city-l"))
 
@@ -237,9 +252,6 @@ class CVB_PT_Help(Panel):
     bl_region_type = 'UI'
     bl_category = 'CVB'
     bl_order = 99
-
-    # TODO: Add a check to the preferences for this and also change preferences if closed
-    # bl_options = {'DEFAULT_CLOSED'}
 
     # (V) Help Group Box
     #     --------------
@@ -254,22 +266,20 @@ class CVB_PT_Help(Panel):
     #   (Y) Button to online help
 
     def draw(self, context):
-        self.layout.operator("object.help",
+        self.layout.operator("cvb.getting_started_help",
                              text="Getting Started",
                              icon='HELP')
 
 
-class CVB_OT_NewMap(Operator):
+class CVB_OT_NewMapButton(Operator):
     # pylint: disable=invalid-name
     """New Map Button"""
-    bl_idname = 'object.new_map_button'
+    bl_idname = 'cvb.new_map_button'
     bl_label = 'New Map'
     bl_options = {"REGISTER", "UNDO"}
     bl_description = """Create a new city map"""
 
     def execute(self, context):
-        # TODO: Rescan the CVB layers so that can hide previous layers if necessary
-
         # if previous map layers
         # if( False ):
         #     pass  # Hide the previous layers
@@ -280,10 +290,10 @@ class CVB_OT_NewMap(Operator):
         return {"FINISHED"}
 
 
-class CVB_OT_GenCity(Operator):
+class CVB_OT_GenCityButton(Operator):
     # pylint: disable=invalid-name
     """Generate city Button"""
-    bl_idname = 'object.gen_city_button'
+    bl_idname = 'cvb.gen_city_button'
     bl_label = 'Generate city'
     bl_options = {"REGISTER", "UNDO"}
     bl_description = """Generate city from map"""
@@ -298,14 +308,12 @@ class CVB_OT_GenCity(Operator):
 class CVB_OT_GettingStartedHelp(Operator):
     # pylint: disable=invalid-name
     """Help Operator"""
-    bl_idname = 'object.help'
+    bl_idname = 'cvb.getting_started_help'
     bl_label = 'Help Getting Started'
     bl_options = {"REGISTER", "UNDO"}
     bl_description = """Help with Cityvilleburg"""
 
     def execute(self, context):
-        # TODO: Rescan the CVB layers so that can hide previous layers if necessary
-
         # if previous map layers
         # if( False ):
         #     pass  # Hide the previous layers
