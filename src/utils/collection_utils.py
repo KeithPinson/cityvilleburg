@@ -1,4 +1,5 @@
 """Routines for creating and finding collections used by CVB"""
+# pylint: disable=line-too-long
 #
 # All interactions with the Blender collections should be
 # done through these routines.
@@ -31,6 +32,8 @@
 # 6. Since we can't control importations, do nothing to ignore case; ie. "city" and "City" are different
 #
 # Copyright (c) 2021 Keith Pinson
+# pylint: enable=line-too-long
+
 
 import re
 import bpy
@@ -63,8 +66,8 @@ def collection_exist(path_string):
             sketchname = parts[1]
             coll = coll.children[sketchname]
 
-            for p in parts[2:]:
-                coll = coll.children[p + " ~ " + sketchname]
+            for sub_parts in parts[2:]:
+                coll = coll.children[sub_parts + " ~ " + sketchname]
 
         except KeyError:
             return False
@@ -83,15 +86,13 @@ def collection_children(path_string):
     if parts:
 
         try:
-            coll = bpy.data.collections[parts[0]]
+            last_i = len(parts) - 1
+            key = parts[last_i] if last_i < 2 else parts[last_i] + " ~ " + parts[1]
 
-            sketchname = parts[1]
-            coll = coll.children[sketchname]
+            coll = bpy.data.collections.get(key)
 
-            for p in parts[2:]:
-                coll = coll.children[p + " ~ " + sketchname]
-
-            children = coll.children.keys()
+            if coll:
+                children = coll.children.keys()
 
         except KeyError:
             return []
@@ -100,6 +101,7 @@ def collection_children(path_string):
 
 
 def collection_verify(path_string):
+    # pylint: disable=consider-using-enumerate
     """Walk the collection path, verify that links are correct"""
 
     missing_node_was_found = False
@@ -129,6 +131,7 @@ def collection_verify(path_string):
 
 
 def collection_first_missing(path_string):
+    # pylint: disable=consider-using-enumerate
     """Walk the collection path, find the first missing"""
 
     first_missing_found_at = -1
@@ -157,6 +160,7 @@ def collection_first_missing(path_string):
 
 
 def collection_add(path_string):
+    # pylint: disable=consider-using-enumerate
     """Walk the list and add the tail end that may be missing."""
     # We cannot try to add nodes with the same name. We need to verify only
     # the tail end nodes need to be added, otherwise fail.
@@ -190,8 +194,9 @@ def collection_add(path_string):
 
 
 def collection_remove(path_string):
+    """Remove the collection; will not remove root"""
     # TODO: Finish collection_remove()
-    pass
+    print(path_string)
 
 
 def new_collection_node(path_string, index):
@@ -204,7 +209,7 @@ def new_collection_node(path_string, index):
     if not parts:
         return new_node
 
-    if not (0 <= index < len(parts)):
+    if not 0 <= index < len(parts):
         return new_node
 
     if index == 0:

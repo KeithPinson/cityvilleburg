@@ -59,11 +59,9 @@ def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_
 
     if tile != "":
         try:
-            v = int(tile.lstrip('-'))
+            v = int(str(tile).lstrip('-'))
             t_tile = "-" + str(v).zfill(5)
         except ValueError:
-            t_tile = ""
-        else:
             t_tile = ""
 
     # Variant needs to either be an empty string or a zero-filled,
@@ -139,8 +137,6 @@ def convert_length_to_km_string(length):
 
     except ValueError:
         length_str = ""
-    else:
-        length_str = ""
 
     return length_str
 
@@ -175,8 +171,6 @@ def format_city_name(city):
 
     except TypeError:
         t_city = ""
-    else:
-        t_city = ""
 
     return t_city
 
@@ -191,8 +185,6 @@ def format_file_name(file_name):
         t_file_name = re.sub(r"[<>:\"/\\|?*]", "", t_file_name)
 
     except TypeError:
-        t_file_name = ""
-    else:
         t_file_name = ""
 
     return t_file_name
@@ -231,7 +223,6 @@ class SketchName:
 
     sketch_name = ""
     city = ""
-    imported = False
     seed = ""
     style = ""
     x = ""
@@ -268,7 +259,7 @@ class SketchName:
         #
         # Can confirm on regex101.com
         #
-        # /(?:(\w+)(?:(?:\#?)([\d]+)))_([a-zA-Z0-9])([^x]+)x([0-9]+M?)(?:(?:\-)([0-9]+))?(?:(?:.)([\d]{3}))?/gm
+        # /(?:(?:(\w+)(?:(?:\#?)([\d]+)))_([a-zA-Z0-9])([^x]+)x([0-9]+M?)(?:(?:\-)([0-9]+))?(?:(?:.)([\d]{3}))?)|(.+)/gm
         #
         # City1_g1x1
         # City1_g10x20
@@ -280,11 +271,12 @@ class SketchName:
         # City1_g1x1-00001.002
         # TauCeti5#1_g30Mx30M.001
         # TauCeti5#1_g1x1-00001.002
+        # Motown
         #
 
         # Regex that captures the format as described above, resulting in:
         #    city, seed, style, x, y, tile, variant
-        rex = r"""(?:(\w+)(?:(?:\#?)([\d]+)))_([a-zA-Z0-9])([^x]+)x([0-9]+M?)(?:(?:\-)([0-9]+))?(?:(?:.)([\d]{3}))?"""
+        rex = r"""(?:(?:(\w+)(?:(?:\#?)([\d]+)))_([a-zA-Z0-9])([^x]+)x([0-9]+M?)(?:(?:\-)([0-9]+))?(?:(?:.)([\d]{3}))?)|(.+)"""
 
         m = re.match(rex, sketchname_string)
 

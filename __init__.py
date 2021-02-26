@@ -11,6 +11,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# pylint: disable=invalid-name, missing-module-docstring, redefined-builtin
+
 __doc__ = """A Blender addon for generating cities"""
 __name__ = "CITYVILLEBURG"
 
@@ -19,9 +21,9 @@ from inspect import isclass
 from bpy.utils import register_class, unregister_class
 from .src.addon.preferences import cvb_addon_register, cvb_addon_unregister
 from .src.addon.preferences import CVB_AddonPreferences
-from .src.panel.n_key_panel import CVB_PT_Main, CVB_OT_NewMap, CVB_OT_GenCity
+from .src.panel.n_key_panel import CVB_PT_Main, CVB_OT_NewMapButton, CVB_OT_GenCityButton
 from .src.panel.n_key_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
-from .src.panel.panel_ops import CVB_OT_NewSketch, CVB_OT_EditCityName
+from .src.panel.panel_ops import CVB_OT_NewSketchButton
 from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
 
 
@@ -50,12 +52,11 @@ print("\n", f'''*** {bl_info['name']} ***''')
 # and then try to perform a simple verification test of class existence.
 
 _CLASS_REGISTRY = (
-    CVB_AddonPreferences,    # | Addon classes (keep at top)
-    CVB_OT_NewMap,
-    CVB_OT_GenCity,
+    CVB_AddonPreferences,  # | Addon classes (keep at top)
+    CVB_OT_NewMapButton,
+    CVB_OT_GenCityButton,
     CVB_OT_GettingStartedHelp,
-    CVB_OT_NewSketch,
-    CVB_OT_EditCityName,
+    CVB_OT_NewSketchButton,
     CVB_PT_Main,
     CVB_PT_Help,
 )

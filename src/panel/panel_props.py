@@ -16,24 +16,19 @@ import bpy
 from bpy.types import PropertyGroup
 from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
+# pylint: disable=relative-beyond-top-level
 from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
 
 
 class CVB_PanelProperties(PropertyGroup):
-    # pylint: disable=invalid-name
+    # pylint: disable=invalid-name, line-too-long
     """Panel properties saved to the blend file"""
-
-    def modify_sketch_size(self, context):
-        """max map size"""
-        return 1000
 
     def update_sketch_visibility(self, context):
         """Toggle visibility of sketch layer"""
-        return True
 
     def update_tile_id(self, context):
         """Impacts the file name """
-        return 0
 
     # sketch_names_prop: Pointer
 
@@ -51,8 +46,9 @@ class CVB_PanelProperties(PropertyGroup):
 
     sketch_visible_prop: BoolProperty(
         name="Sketch Visibility",
-        description="""Toggle Sketch Visibility""" if not is_sketch_list_empty() else "Inactive until New Sketch",
-        default=True if not is_sketch_list_empty() else False,
+        description="""Toggle Sketch Visibility""" if
+        not is_sketch_list_empty() else "Inactive until New Sketch",
+        default=not is_sketch_list_empty(),
         update=update_sketch_visibility)
 
     sketch_xy_linked_prop: IntProperty(
@@ -61,8 +57,7 @@ class CVB_PanelProperties(PropertyGroup):
         min=1,
         max=10_000,
         step=100,
-        default=1000,
-        update=modify_sketch_size)
+        default=1000)
 
     sketch_x_prop: IntProperty(
         name="Sketch X",
@@ -70,8 +65,7 @@ class CVB_PanelProperties(PropertyGroup):
         min=1,
         max=10_000,
         step=100,
-        default=1000,
-        update=modify_sketch_size)
+        default=1000)
 
     sketch_y_prop: IntProperty(
         name="Sketch Y",
@@ -79,12 +73,11 @@ class CVB_PanelProperties(PropertyGroup):
         min=1,
         max=10_000,
         step=100,
-        default=1000,
-        update=modify_sketch_size)
+        default=1000)
 
     # First letter of first element must be unique (it is used in city filename)
     sketch_style_list = [
-        ('grid', "Grid Style City", "A city map modeled after the American grid system"),
+        ('grid', "Grid Plan City", "A city map modeled after the planned grid system"),
         ('medieval', "Medieval City Style", "A layout from years ago when cities formed inside a defensive wall"),
         ('skyscrapers', "Skyscraper City Style", "A city map modeled on the if you can't build out, build up"),
         ('western', "Western City Style", "A town built along a thoroughfare; water, rail, or road")
@@ -109,7 +102,7 @@ class CVB_PanelProperties(PropertyGroup):
 
     using_tile_id_prop: BoolProperty(
         name="Multi-file Renders",
-        description="""Facilitates rendering across multiple files for one   single city""",
+        description="""Facilitates rendering across multiple files for one single city""",
         default=False)
 
 
@@ -117,7 +110,9 @@ def cvb_panel_register():
     """Panel properties to register"""
     bpy.utils.register_class(CVB_CityNameProperties)
     bpy.utils.register_class(CVB_PanelProperties)
+    # pylint: disable=assignment-from-no-return
     bpy.types.Scene.CVB = PointerProperty(name='CVB', type=CVB_PanelProperties)
+    # pylint: enable=assignment-from-no-return
 
 
 def cvb_panel_unregister():

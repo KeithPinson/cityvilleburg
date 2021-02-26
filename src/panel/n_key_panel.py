@@ -12,7 +12,7 @@
 import bpy
 from bpy.types import Panel, Operator
 from ..addon.preferences import cvb_icon
-from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
+from .citysketchname_props import is_sketch_list_empty
 
 
 class CVB_PT_Main(Panel):
