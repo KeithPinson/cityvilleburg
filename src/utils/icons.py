@@ -6,6 +6,7 @@
 import os
 import pathlib
 import bpy
+import bpy.utils.previews
 
 
 class IconCollection:
