@@ -20,29 +20,16 @@ class CVB_OT_NewSketchButton(Operator):
     bl_description = """Add a new City Map Sketch"""
 
     def execute(self, context):
-        # Make a new sketch
-        bpy.ops.mesh.primitive_plane_add(size=50)
-
         cvb = context.scene.CVB
 
-        plain_sketchname = cvb.city_props.make_sketch_from_props(cvb)
+        new_sketchname = cvb.city_props.sketch_name_with_next_variant(cvb)
 
-        new_variant = cvb.city_props.sketch_names_get_next_variant(
-            city=plain_sketchname.city,
-            seed=plain_sketchname.seed,
-            style=plain_sketchname.style,
-            x=plain_sketchname.x,
-            y=plain_sketchname.y,
-            tile=plain_sketchname.tile
-        ) if plain_sketchname else 0
-
-        plain_sketchname.update_sketchname(variant=new_variant)
-
-        name = plain_sketchname.sketch_name
-
-        if name:
-            path = "/CVB/{}/Sketch".format(name)
+        if new_sketchname:
+            path = "/CVB/{}/Sketch".format(new_sketchname)
 
             collection_add(path)
+
+        # Make a new sketch
+        bpy.ops.mesh.primitive_plane_add(size=50)
 
         return {"FINISHED"}

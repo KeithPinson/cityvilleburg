@@ -12,10 +12,11 @@
 # more intuitive for the user.
 #
 # Unfortunately this doesn't seem to be possible in Blender
-# as of v2.93, so we are left with taking two fields on the
+# as of v2.93, so we are left with using two fields on the
 # panel to display city and sketch names. (Incidentally we
-# did experiment with less that satisfactory results with the
-# sketchname in the panel header.)
+# did experiment with one city field and with sketchname
+# displayed in the panel header. Less room was taken but
+# it was confusing to decipher what was going on.
 #
 # Copyright (c) 2021 Keith Pinson
 
@@ -39,6 +40,30 @@ class CVB_CityNameProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """City Name / Sketch Name properties"""
 
+    def _get_properties(self, cvb, variant=0, import_name=""):
+
+        components = {
+            'city': "",
+            'seed': "",
+            'style': "",
+            'x': "",
+            'y': "",
+            'tile': "",
+            'variant': 0,
+            'import_name': import_name
+        } if import_name else {
+            'city': self.city_name_prop,
+            'seed': cvb.seed_prop,
+            'style': cvb.sketch_style_prop,
+            'x': cvb.sketch_x_prop if not cvb.using_tile_id_prop else cvb.sketch_xy_linked_prop,
+            'y': cvb.sketch_y_prop if not cvb.using_tile_id_prop else cvb.sketch_xy_linked_prop,
+            'tile': cvb.tile_id_prop if cvb.using_tile_id_prop else "",
+            'variant': variant,
+            'import_name': ""
+        }
+
+        return components
+
     def city_name_prop_update(self, context):
         """city_name_prop update callback"""
 
@@ -52,28 +77,6 @@ class CVB_CityNameProperties(PropertyGroup):
         sketchname_string = _CVB_SKETCH_NAME.update_sketchname(city=name)
 
         print(sketchname_string)
-
-    def make_sketch_from_props(self, cvb):
-        """Gather different properties that combine to form the sketchname"""
-
-        city = self.city_name_prop
-        seed = cvb.seed_prop
-        style = cvb.sketch_style_prop
-        x = cvb.sketch_x_prop if not cvb.using_tile_id_prop else cvb.sketch_xy_linked_prop
-        y = cvb.sketch_y_prop if not cvb.using_tile_id_prop else cvb.sketch_xy_linked_prop
-        tile = cvb.tile_id_prop if cvb.using_tile_id_prop else ""
-
-        plain_sketchname = sketchname_parse.SketchName(
-            city,           # city
-            seed,           # seed
-            style,          # style
-            x,              # x
-            y,              # y
-            tile,           # tile
-            0,              # variant
-            "")             # import
-
-        return plain_sketchname
 
     def refresh_sketch_list(self, cvb):
         """Extract the sketchnames found in the Blender Collections"""
@@ -93,32 +96,94 @@ class CVB_CityNameProperties(PropertyGroup):
 
                 _CVB_SKETCH_LIST.append(sketch)
 
-    def sketch_names_get_next_variant(self, city, seed, style, x, y, tile=""):
+    def sketch_name_items_callback(scene, context):
+        """Dynamically fill sketch_name_prop enums"""
+        #
+        # Be careful, this will be called every time the mouse passes over
+        # the enum and for maybe a dozen times.
+        #
+        items = []
+
+        # We assume the _CVB_SKETCH_LIST is current and correct
+        for s in _CVB_SKETCH_LIST:
+            if hasattr(s, "sketch_name"):
+                items.append((s.sketch_name, s.sketch_name, ""))
+
+        if not items:
+            cvb = context.scene.CVB if context else bpy.context.scene.CVB
+
+            plain_sketchname = cvb.city_props.sketch_name_with_no_variant(cvb)
+
+            # items.insert(0, ("city1_g1x1", "city1_g1x1", "Press + to generate sketch"))
+            items.insert(0, (plain_sketchname, plain_sketchname, "Press + to generate sketch"))
+
+        return items
+
+    def sketch_name_update(self, context):
+        """Update other properties based off of the sketch name"""
+        # This is only called if something in the list was selected
+
+        cvb = context.scene.CVB
+
+        sketch = sketchname_parse.SketchName()
+
+        sketch.string_to_sketchname(cvb.city_props.sketch_name_prop)
+
+        cvb.city_props.city_name_prop = sketch.city
+
+    def sketch_name_with_next_variant(self, cvb):
         """Find the last variant value and increment it"""
+
+        plain_sketchname = self.sketch_name_with_no_variant(cvb)
 
         last_variant = 0
 
         for sketch in _CVB_SKETCH_LIST:
-            if(sketch.city == city and
-               sketch.seed == seed and
-               sketch.style == style and
-               sketch.x == x and
-               sketch.y == y and
-               sketch.tile == tile and
-               sketch.variant > last_variant):
 
-               last_variant = sketch.variant
+            new_variant = last_variant
 
-        return last_variant + 1
+            try:
+                new_variant = int(sketch.variant)
+            except ValueError:
+                new_variant = last_variant
 
-    def sketch_names_get_all(self):
-        """Return a list of just the sketch names"""
+            this_plain_sketchname = sketch.sketchname_string_plain()
 
-        sketch_names = list(())
+            if(this_plain_sketchname == plain_sketchname and
+               new_variant > last_variant):
 
-        self.sketch_names_count_prop = len(sketch_names)
+                last_variant = new_variant
 
-        return sketch_names
+        props = self._get_properties(cvb, variant=(last_variant + 1))
+
+        plain_sketch_name = sketchname_parse.build_sketchname_string(
+            props['city'],
+            props['seed'],
+            props['style'],
+            props['x'],
+            props['y'],
+            props['tile'],
+            props['variant'],
+            props['import_name'])
+
+        return plain_sketch_name
+
+    def sketch_name_with_no_variant(self, cvb):
+        """Gather properties and combine to form the sketchname"""
+
+        props = self._get_properties(cvb)
+
+        plain_sketch_name = sketchname_parse.build_sketchname_string(
+            props['city'],
+            props['seed'],
+            props['style'],
+            props['x'],
+            props['y'],
+            props['tile'],
+            props['variant'],
+            props['import_name'])
+
+        return plain_sketch_name
 
     city_name_prop: StringProperty(
         name="",
@@ -134,49 +199,9 @@ class CVB_CityNameProperties(PropertyGroup):
         description="""City name""",
         default="Cityvilleburg")
 
-    def sketch_name_update(self, context):
-        """Update other properties based off of the sketch name"""
-        # This is only called if something in the list was selected
-
-        cvb = context.scene.CVB
-
-        sketch = sketchname_parse.SketchName()
-
-        sketch.string_to_sketchname(cvb.city_props.sketch_name_prop)
-
-        cvb.city_props.city_name_prop = sketch.city
-
-    # The empty list should have a sketch name in it, but without the variant number
-    # sketch_name_list =
-
-    # ("city1_g1x1", "city1_g1x1", "Press + to generate sketch")
-
-    def sketchnames_callback(scene, context):
-        """Dynamically fill sketch_name_prop enums"""
-        #
-        # Be careful, this will be called every time the mouse passes over
-        # the enum and for maybe a dozen times.
-        #
-        items = []
-
-        for s in _CVB_SKETCH_LIST:
-            if hasattr(s, "sketch_name"):
-                items.append((s.sketch_name, s.sketch_name, ""))
-
-        cvb = context.scene.CVB
-
-        plain_sketchname = cvb.city_props.make_sketch_from_props(cvb)
-
-        name = plain_sketchname.sketch_name
-
-        # items.insert(0, ("city1_g1x1", "city1_g1x1", "Press + to generate sketch"))
-        items.insert(0, (name, name, "Press + to generate sketch"))
-
-        return items
-
     sketch_name_prop: EnumProperty(
         name="",
         description="""City Sketches""",
         default=None,
-        items=sketchnames_callback,
+        items=sketch_name_items_callback,
         update=sketch_name_update)
