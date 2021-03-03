@@ -12,7 +12,7 @@
 import bpy
 from bpy.types import Panel, Operator
 from ..addon.preferences import cvb_icon
-from .citysketchname_props import is_sketch_list_empty
+from .citysketchname_props import is_sketch_list_empty, is_import
 
 
 class CVB_PT_Main(Panel):
@@ -145,9 +145,6 @@ class CVB_PT_Main(Panel):
 
         panel_column = self.layout
 
-        # Potentially a heavy call...might need to call it on another thread
-        cvb.city_props.refresh_sketch_list(cvb)
-
         # (A) New Map Group Box
         new_map_group_box = panel_column.box()
 
@@ -176,7 +173,7 @@ class CVB_PT_Main(Panel):
 
         #       (E) Sketch Name Drop Down
         sketch_name_dropdown = city_name_entry.row().column()
-        sketch_name_dropdown.enabled = are_sketches_in_list
+        sketch_name_dropdown.enabled = True  # There will always be something in the list
         sketch_name_dropdown.prop(
             cvb.city_props,
             "sketch_name_prop",
@@ -242,6 +239,8 @@ class CVB_PT_Main(Panel):
         generate_city_button.operator("cvb.gen_city_button",
                                       text="Generate city",
                                       icon_value=cvb_icon(context, "icon-gen-city-l"))
+
+        cvb.city_props.refresh_sketch_name(cvb)
 
 
 class CVB_PT_Help(Panel):

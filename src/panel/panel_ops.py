@@ -24,12 +24,16 @@ class CVB_OT_NewSketchButton(Operator):
 
         new_sketchname = cvb.city_props.sketch_name_with_next_variant(cvb)
 
-        if new_sketchname:
-            path = "/CVB/{}/Sketch".format(new_sketchname)
+        if not new_sketchname:
+            return {"CANCEL"}
 
-            collection_add(path)
+        path = "/CVB/{}/Sketch".format(new_sketchname)
+        collection_add(path)
 
         # Make a new sketch
         bpy.ops.mesh.primitive_plane_add(size=50)
+
+        # Refresh the list after we've done everything
+        cvb.city_props.refresh_sketch_list(cvb)
 
         return {"FINISHED"}

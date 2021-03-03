@@ -24,25 +24,61 @@ class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name, line-too-long
     """Panel properties saved to the blend file"""
 
+    def update_seed(self, context):
+        """Seed update"""
+        cvb = context.scene.CVB
+        cvb.city_props.refresh_sketch_list(cvb)
+
+    def update_sketch_style(self, context):
+        """Sketch style update"""
+        cvb = context.scene.CVB
+        cvb.city_props.refresh_sketch_list(cvb)
+
     def update_sketch_visibility(self, context):
         """Toggle visibility of sketch layer"""
 
+    def update_sketch_xy_linked(self, context):
+        """Sketch xy linked update"""
+        cvb = context.scene.CVB
+        cvb.city_props.refresh_sketch_list(cvb)
+
+    def update_sketch_x(self, context):
+        """Sketch x update"""
+        cvb = context.scene.CVB
+        cvb.city_props.refresh_sketch_list(cvb)
+
+    def update_sketch_y(self, context):
+        """Sketch y update"""
+        cvb = context.scene.CVB
+        cvb.city_props.refresh_sketch_list(cvb)
+
     def update_tile_id(self, context):
         """Impacts the file name """
-
-    # sketch_names_prop: Pointer
+        cvb = context.scene.CVB
+        cvb.city_props.refresh_sketch_list(cvb)
 
     city_props: PointerProperty(type=CVB_CityNameProperties)
 
     seed_prop: IntProperty(
         name="Seed",
         description="""Reproducible random sketch id""",
-        default=1, min=1, max=32_767)
+        default=1, min=1, max=32_767,
+        update=update_seed)
 
-    sketch_variant_prop: IntProperty(
-        name="Variant",
-        description="""Custom sketch variant""",
-        default=0, min=0, max=999)
+    # First letter of first element must be unique (it is used in city filename)
+    sketch_style_list = [
+        ('grid', "Grid Plan City", "A city map modeled after the planned grid system"),
+        ('medieval', "Medieval City Style", "A layout from years ago when cities formed inside a defensive wall"),
+        ('skyscrapers', "Skyscraper City Style", "A city map modeled on the if you can't build out, build up"),
+        ('western', "Western City Style", "A town built along a thoroughfare; water, rail, or road")
+    ]
+
+    sketch_style_prop: EnumProperty(
+        name="",
+        description="""Style hint that affects map sketch""",
+        default='grid',
+        items=sketch_style_list,
+        update=update_sketch_style)
 
     sketch_visible_prop: BoolProperty(
         name="Sketch Visibility",
@@ -57,7 +93,8 @@ class CVB_PanelProperties(PropertyGroup):
         min=1,
         max=10_000,
         step=100,
-        default=1000)
+        default=1000,
+        update=update_sketch_xy_linked)
 
     sketch_x_prop: IntProperty(
         name="Sketch X",
@@ -65,7 +102,8 @@ class CVB_PanelProperties(PropertyGroup):
         min=1,
         max=10_000,
         step=100,
-        default=1000)
+        default=1000,
+        update=update_sketch_x)
 
     sketch_y_prop: IntProperty(
         name="Sketch Y",
@@ -73,21 +111,8 @@ class CVB_PanelProperties(PropertyGroup):
         min=1,
         max=10_000,
         step=100,
-        default=1000)
-
-    # First letter of first element must be unique (it is used in city filename)
-    sketch_style_list = [
-        ('grid', "Grid Plan City", "A city map modeled after the planned grid system"),
-        ('medieval', "Medieval City Style", "A layout from years ago when cities formed inside a defensive wall"),
-        ('skyscrapers', "Skyscraper City Style", "A city map modeled on the if you can't build out, build up"),
-        ('western', "Western City Style", "A town built along a thoroughfare; water, rail, or road")
-    ]
-
-    sketch_style_prop: EnumProperty(
-        name="",
-        description="""Style hint that affects map sketch""",
-        default='grid',
-        items=sketch_style_list)
+        default=1000,
+        update=update_sketch_y)
 
     tile_id_prop: IntProperty(
         name="",
@@ -104,6 +129,13 @@ class CVB_PanelProperties(PropertyGroup):
         name="Multi-file Renders",
         description="""Facilitates rendering across multiple files for one single city""",
         default=False)
+
+    # Internal number, typically incremented when new sketch is added
+    variant_prop: IntProperty(
+        name="Variant",
+        description="""Sketch variant""",
+        default=0, min=0, max=999)
+
 
 
 def cvb_panel_register():

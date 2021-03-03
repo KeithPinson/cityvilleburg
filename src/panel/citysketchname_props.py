@@ -27,20 +27,27 @@ from bpy.props import (
 from ..utils import sketchname_parse
 from ..utils.collection_utils import collection_children
 
-
-_CVB_SKETCH_NAME = sketchname_parse.SketchName()
+# Globals needed by Blender
+_CVB_SKETCHNAME = sketchname_parse.SketchName()
 _CVB_SKETCH_LIST = []  # We can't guarantee list to be always accurate
+_CVB_SKETCH_NAME_ENUMS = []
+
 
 def is_sketch_list_empty():
     """Check to see if any sketches"""
     return len(_CVB_SKETCH_LIST) == 0
 
 
+def is_import():
+    """Check to see if sketch is an import"""
+    return len(_CVB_SKETCHNAME.import_name) > 0
+
+
 class CVB_CityNameProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """City Name / Sketch Name properties"""
 
-    def _get_properties(self, cvb, variant=0, import_name=""):
+    def _get_properties(self, cvb, variant=-1, import_name=""):
 
         components = {
             'city': "",
@@ -58,28 +65,15 @@ class CVB_CityNameProperties(PropertyGroup):
             'x': cvb.sketch_x_prop if not cvb.using_tile_id_prop else cvb.sketch_xy_linked_prop,
             'y': cvb.sketch_y_prop if not cvb.using_tile_id_prop else cvb.sketch_xy_linked_prop,
             'tile': cvb.tile_id_prop if cvb.using_tile_id_prop else "",
-            'variant': variant,
+            'variant': variant if variant >= 0 else cvb.variant_prop,
             'import_name': ""
         }
 
         return components
 
-    def city_name_prop_update(self, context):
-        """city_name_prop update callback"""
-
-        # Do not set self.city_name_prop inside this callback, it
-        # will cause runaway recursion
-        name = self.city_name_prop
-
-        if len(name) < 1:
-            name = "city"
-
-        sketchname_string = _CVB_SKETCH_NAME.update_sketchname(city=name)
-
-        print(sketchname_string)
-
     def refresh_sketch_list(self, cvb):
-        """Extract the sketchnames found in the Blender Collections"""
+        """Rebuild sketch name strings by pulling from the Blender Collections"""
+        # Currently this is called everytime the panel draws()
 
         # We are going to refill the list so first clear it
         _CVB_SKETCH_LIST.clear()
@@ -96,40 +90,49 @@ class CVB_CityNameProperties(PropertyGroup):
 
                 _CVB_SKETCH_LIST.append(sketch)
 
+    def refresh_sketch_name(self, cvb):
+        """Set the current sketch name"""
+
+        global _CVB_SKETCHNAME
+        del _CVB_SKETCHNAME
+        _CVB_SKETCHNAME = self.sketch_name(cvb)
+
+        # print(_CVB_SKETCHNAME.to_json())
+
     def sketch_name_items_callback(scene, context):
         """Dynamically fill sketch_name_prop enums"""
-        #
+
         # Be careful, this will be called every time the mouse passes over
         # the enum and for maybe a dozen times.
-        #
+
         items = []
 
-        # We assume the _CVB_SKETCH_LIST is current and correct
+        #
+        # 1. Fill items -- We assume the _CVB_SKETCH_LIST
+        #                  is current and correct
+        #
         for s in _CVB_SKETCH_LIST:
             if hasattr(s, "sketch_name"):
                 items.append((s.sketch_name, s.sketch_name, ""))
 
-        if not items:
-            cvb = context.scene.CVB if context else bpy.context.scene.CVB
-
-            plain_sketchname = cvb.city_props.sketch_name_with_no_variant(cvb)
-
-            # items.insert(0, ("city1_g1x1", "city1_g1x1", "Press + to generate sketch"))
-            items.insert(0, (plain_sketchname, plain_sketchname, "Press + to generate sketch"))
-
-        return items
-
-    def sketch_name_update(self, context):
-        """Update other properties based off of the sketch name"""
-        # This is only called if something in the list was selected
-
+        #
+        # 2. Add example sketch name that may be added
+        #
         cvb = context.scene.CVB
 
-        sketch = sketchname_parse.SketchName()
+        plain_sketch_name = cvb.city_props.sketch_name_with_no_variant(cvb)
 
-        sketch.string_to_sketchname(cvb.city_props.sketch_name_prop)
+        sketches = [sk for sk in _CVB_SKETCH_LIST if sk.sketch_name.startswith(plain_sketch_name)]
 
-        cvb.city_props.city_name_prop = sketch.city
+        if not sketches:
+            pending_name = "[" + plain_sketch_name + "]"
+            items.insert(0, (plain_sketch_name, pending_name, "Press + to generate sketch"))
+
+        global _CVB_SKETCH_NAME_ENUMS
+        _CVB_SKETCH_NAME_ENUMS.clear()
+        _CVB_SKETCH_NAME_ENUMS.extend(items)
+
+        return _CVB_SKETCH_NAME_ENUMS
 
     def sketch_name_with_next_variant(self, cvb):
         """Find the last variant value and increment it"""
@@ -154,6 +157,8 @@ class CVB_CityNameProperties(PropertyGroup):
 
                 last_variant = new_variant
 
+        cvb.variant_prop = last_variant + 1
+
         props = self._get_properties(cvb, variant=(last_variant + 1))
 
         plain_sketch_name = sketchname_parse.build_sketchname_string(
@@ -168,8 +173,8 @@ class CVB_CityNameProperties(PropertyGroup):
 
         return plain_sketch_name
 
-    def sketch_name_with_no_variant(self, cvb):
-        """Gather properties and combine to form the sketchname"""
+    def sketch_name_with_no_variant(self, cvb, ascii_only=False):
+        """Gather properties to form the sketch name string less the variant"""
 
         props = self._get_properties(cvb)
 
@@ -180,19 +185,63 @@ class CVB_CityNameProperties(PropertyGroup):
             props['x'],
             props['y'],
             props['tile'],
+            0,
+            props['import_name'],
+            ascii_only=ascii_only)
+
+        return plain_sketch_name
+
+    def sketch_name(self, cvb):
+        """Gather properties and combine to form the sketchname class"""
+
+        props = self._get_properties(cvb)
+
+        sketchname = sketchname_parse.SketchName(
+            props['city'],
+            props['seed'],
+            props['style'],
+            props['x'],
+            props['y'],
+            props['tile'],
             props['variant'],
             props['import_name'])
 
-        return plain_sketch_name
+        return sketchname
+
+    def update_city_name_prop(self, context):
+        """city_name_prop update callback"""
+
+        # Do not set self.city_name_prop inside this callback, it
+        # will cause runaway recursion
+        name = self.city_name_prop
+
+        if len(name) < 1:
+            name = "city"
+
+    def update_sketch_name(self, context):
+        """Update other properties based off of the sketch name"""
+        # This is only called if something in the list was selected
+
+        cvb = context.scene.CVB
+
+        sketch = sketchname_parse.SketchName()
+
+        sketch.string_to_sketchname(cvb.city_props.sketch_name_prop)
+
+        # Update panel properties based on sketchname
+
+        cvb.city_props.refresh_sketch_list(cvb)
+
+        cvb.city_props.city_name_prop = sketch.city
 
     city_name_prop: StringProperty(
         name="",
         default="city",
-        description="""City Name\n(A filename compatible label limited in length)""",
-        # We do not want options={'TEXTEDIT_UPDATE'}
-        subtype='FILE_NAME',
-        maxlen=28,
-        update=city_name_prop_update)
+        description="""City Name""",
+        subtype='NONE',  # 'FILE_NAME' currently does not filter "[<>:\"/\\|?*]" chars
+        # The options={'TEXTEDIT_UPDATE'} will not fix FILE_NAME not filtering
+        maxlen=100,
+        update=update_city_name_prop)
 
     city_panel_header_prop: StringProperty(
         name="",
@@ -204,4 +253,4 @@ class CVB_CityNameProperties(PropertyGroup):
         description="""City Sketches""",
         default=None,
         items=sketch_name_items_callback,
-        update=sketch_name_update)
+        update=update_sketch_name)

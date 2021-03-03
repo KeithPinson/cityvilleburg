@@ -27,15 +27,20 @@
 # Copyright (c) 2021 Keith Pinson
 
 import re
-
+import json
 
 # pylint: disable=too-many-arguments, too-many-instance-attributes, too-many-locals
 
-def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_name=""):
+_CVB_PENDING_NAME = ""
+
+
+def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_name="", ascii_only=False):
     # pylint: disable=invalid-name, too-many-locals
     """From the parameters build and return the Sketch Name string"""
 
     sketch_name = ""
+    global _CVB_PENDING_NAME
+    _CVB_PENDING_NAME = ""
 
     # Make sure one set of parameters are set or the other (import name)
     if not verify_sketchname_parameters(city, seed, style, x, y, import_name):
@@ -77,10 +82,11 @@ def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_
     except ValueError:
         t_variant = ""
 
-    # If subtype='FILE_NAME' was used with the StringProperty we should be
-    # passed a filename compatible string, however we still may need to remove
-    # quoting and spaces, so we will format the string making no assumptions
-    t_city = format_city_name(city)
+    # The StringProperty subtype='FILE_NAME' does not validate characters. It
+    # instead effects the display and shows the string as a shortened 20 character
+    # filename with a few dots in the middle, replacing the removed characters.
+    # So, we still need to remove invalid characters
+    t_city = format_city_name(city, max_length=28, ascii_only=ascii_only)
 
     # Seeds should be an integer greater than zero if set
     try:
@@ -121,6 +127,7 @@ def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_
                 tile=t_tile,
                 variant=t_variant)
 
+    _CVB_PENDING_NAME = sketch_name
     return sketch_name
 
 
@@ -141,7 +148,7 @@ def convert_length_to_km_string(length):
     return length_str
 
 
-def format_city_name(city):
+def format_city_name(city, max_length=100, ascii_only=False):
     # pylint: disable=line-too-long
     """Format the city name string for incorporating into Sketch Name string"""
     #
@@ -155,7 +162,7 @@ def format_city_name(city):
     #
 
     try:
-        t_city = city
+        t_city = "" + city
 
         # Remove leading/following quotes
         t_city = t_city.strip("""\"""")
@@ -163,11 +170,21 @@ def format_city_name(city):
 
         # Remove <>:"/\|?* and _
         t_city = format_file_name(t_city)
-        t_city = t_city.replace("_", "")    # Underscore is reserved as a delimiter in the sketchname
+        t_city = t_city.replace("_", "")  # Underscore is reserved as a delimiter in the sketchname
 
         # Capitalize words and remove spaces
-        t_city = t_city.title()  # Underscores have to be removed before calling this
+        t_city = t_city.title()  # Make sure to remove underscores before calling this
         t_city = t_city.replace(" ", "")
+
+        # Truncate the city name to an arbitrary number of characters
+        if len(t_city) > max_length:
+            # Two-dot-leader; Unicode 0x2025 character
+            two_dot = ".." if ascii_only else "‥"
+            end_length = 5
+            delimiter_length = len(two_dot)
+            front_length = max_length - end_length - delimiter_length
+
+            t_city = t_city[:front_length] + two_dot + t_city[-end_length:]
 
     except TypeError:
         t_city = ""
@@ -297,6 +314,49 @@ class SketchName:
         """Extract the Sketch Name string and return it"""
 
         return self.sketch_name
+
+    def sketchname_string_plain(self):
+        """Return the sketchname string without the variant"""
+
+        plain_sketchname_string = build_sketchname_string(
+            self.city,
+            self.seed,
+            self.style,
+            self.x,
+            self.y,
+            self.tile)
+
+        return plain_sketchname_string
+
+    def to_json(self) -> str:
+        result = ""
+
+        json_str = """{{\
+            "sketch_name": "{sketch_name}",\
+            "city": "{city}",\
+            "seed": "{seed}",\
+            "style": "{style}",\
+            "x": "{x}",\
+            "y": "{y}",\
+            "tile": "{tile}",\
+            "variant": {variant},\
+            "import_name": "{import_name}"\
+        }}""".format(
+            sketch_name=self.sketch_name,
+            city=self.city,
+            seed=self.seed,
+            style=self.style,
+            x=self.x,
+            y=self.y,
+            tile=self.tile,
+            variant=self.variant,
+            import_name=self.import_name
+        )
+
+        result = json_str
+
+        return result
+
 
     def update_sketchname(
             self,
