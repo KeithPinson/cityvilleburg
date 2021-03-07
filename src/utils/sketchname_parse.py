@@ -82,10 +82,8 @@ def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_
     except ValueError:
         t_variant = ""
 
-    # The StringProperty subtype='FILE_NAME' does not validate characters. It
-    # instead effects the display and shows the string as a shortened 20 character
-    # filename with a few dots in the middle, replacing the removed characters.
-    # So, we still need to remove invalid characters
+    # The StringProperty subtype='FILE_NAME' does not validate
+    # characters, so we still need to remove invalid characters
     t_city = format_city_name(city, max_length=28, ascii_only=ascii_only)
 
     # Seeds should be an integer greater than zero if set
@@ -94,15 +92,15 @@ def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_
     except ValueError:
         t_seed = ""
 
-    # We only use the first letter
+    # The style is encoded, confirm it is only 1 character
     try:
         t_style = style[0]
     except IndexError:
         t_style = ""
 
     # X and Y size follow the same rules: Basically convert to km or indicate meters
-    t_x = convert_length_to_km_string(x)
-    t_y = convert_length_to_km_string(y)
+    t_x = convert_length_to_km(x)
+    t_y = convert_length_to_km(y)
 
     # Validate the strings before building the record
     if(len(t_city) > 0 and
@@ -131,7 +129,24 @@ def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_
     return sketch_name
 
 
-def convert_length_to_km_string(length):
+def convert_km_to_length(length):
+    """Convert length like '1' to 1000 or '30M' to 30"""
+
+    try:
+        if length[-1:] == "M":
+            t_length = int(length[:-1])  # Trim off the 'M'
+        else:
+            t_length = int(float(length) * 1000)  # Convert to meters
+
+        length_str = str(t_length)
+
+    except ValueError:
+        length_str = ""
+
+    return length_str
+
+
+def convert_length_to_km(length):
     """Convert length like 1000 to '1' or 30 to '30M'"""
 
     try:
@@ -140,7 +155,7 @@ def convert_length_to_km_string(length):
         if t_length < 1000:
             length_str = str(t_length) + "M"
         else:
-            length_str = str(int(t_length / 1000))
+            length_str = "%g" % (float(t_length) / 1000.0)
 
     except ValueError:
         length_str = ""
@@ -260,6 +275,55 @@ class SketchName:
             import_name=""):
 
         self.update_sketchname(city, seed, style, x, y, tile, variant, import_name)
+
+    def get_sketch_name(self):
+        return self.sketch_name
+
+    def get_city(self):
+        return self.city
+
+    def get_seed(self):
+        result = 1
+
+        try:
+            result = int(self.seed)
+        except ValueError:
+            result = 1
+
+        return result
+
+    def get_style(self):
+        return self.style
+
+    def get_x(self):
+        return int(convert_km_to_length(self.x))
+
+    def get_y(self):
+        return int(convert_km_to_length(self.y))
+
+    def get_tile(self):
+        result = 0
+
+        try:
+            result = int(self.tile)
+        except ValueError:
+            result = 0
+
+        return result
+
+    def get_variant(self):
+        result = 0
+
+        try:
+            result = int(self.variant)
+        except ValueError:
+            result = 0
+
+        return result
+
+
+    def get_import_name(self):
+        return self.import_name
 
     def string_to_sketchname(self, sketchname_string):
         # pylint: disable=line-too-long, invalid-name

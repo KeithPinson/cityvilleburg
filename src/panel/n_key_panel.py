@@ -160,74 +160,83 @@ class CVB_PT_Main(Panel):
         # New Map Options Box
         new_map_button_options = new_map_group_box.box()
 
-        #       city Name Entry Row
-        city_name_entry = new_map_button_options.row(align=True).box()
+        if not is_import():
 
-        #           (C) City Name Field
-        city_name_field = city_name_entry.row(align=True)
-        city_name_field.prop(cvb.city_props, "city_name_prop", text="")
+            #       city Name Entry Row
+            city_name_entry = new_map_button_options.row(align=True).box()
 
-        #           (D) "+" button
-        city_name_plus_button = city_name_field.split()
-        city_name_plus_button.operator("cvb.new_sketch_button", text="", icon='ADD')
+            #           (C) City Name Field
+            city_name_field = city_name_entry.row(align=True)
+            city_name_field.prop(cvb.city_props, "city_name_prop", text="")
 
-        #       (E) Sketch Name Drop Down
-        sketch_name_dropdown = city_name_entry.row().column()
+            #           (D) "+" button
+            city_name_plus_button = city_name_field.split()
+            city_name_plus_button.operator("cvb.new_sketch_button", text="", icon='ADD')
+
+        #       (E) Sketch Name Dropdown
+        # Current programmatic control is limited so deconstruct the dropdown
+        sketch_name_entry = new_map_button_options.row(align=True)
+        sketch_name_field = sketch_name_entry.row(align=True)  # The sketch name
+        sketch_name_field.prop(cvb.city_props, "sketch_name_prop", text="", emboss=True)
+
+        sketch_name_dropdown = sketch_name_field  # The sketch names dropdown
         sketch_name_dropdown.enabled = True  # There will always be something in the list
         sketch_name_dropdown.prop(
             cvb.city_props,
-            "sketch_name_prop",
+            "sketch_name_enum_prop",
             text="",
-            icon_only=False,
+            icon_only=True,
             icon='MESH_GRID')
 
-        #       (F) Seed
-        # seed = cvb_prefs(context).cvb_seed
-        seed_stepper = new_map_button_options.row(align=True)
-        seed_stepper.prop(cvb, "seed_prop", text="Seed")
+        if not is_import():
 
-        #       (G) Map Style Drop Down
-        map_style_dropdown = new_map_button_options.row(align=True)
-        map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
+            #       (F) Seed
+            # seed = cvb_prefs(context).cvb_seed
+            seed_stepper = new_map_button_options.row(align=True)
+            seed_stepper.prop(cvb, "seed_prop", text="Seed")
 
-        #       (H) Map X,Y
-        sketch_x_y = new_map_button_options.row(align=True)
-        if cvb.using_tile_id_prop:
-            sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="X")
-            sketch_x_y.label(text="", icon='LINKED')
-            sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="Y")
-        else:
-            sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
-            sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
+            #       (G) Map Style Drop Down
+            map_style_dropdown = new_map_button_options.row(align=True)
+            map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
 
-        #       Hide/Scale Row
-        hide_scale_row = new_map_button_options.row(align=True)
+            #       (H) Map X,Y
+            sketch_x_y = new_map_button_options.row(align=True)
+            if cvb.using_tile_id_prop:
+                sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="X")
+                sketch_x_y.label(text="", icon='LINKED')
+                sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="Y")
+            else:
+                sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
+                sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
-        #       (I) Hide sketch
-        hide_sketch_checkbox = hide_scale_row.column()
+            #       Hide/Scale Row
+            hide_scale_row = new_map_button_options.row(align=True)
 
-        hide_sketch_checkbox.enabled = are_sketches_in_list
-        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
+            #       (I) Hide sketch
+            hide_sketch_checkbox = hide_scale_row.column()
 
-        #       (J) Scale sketch
-        # TODO: Either use the cast modifier or geometry nodes in 2.92
+            hide_sketch_checkbox.enabled = are_sketches_in_list
+            hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
 
-        #       (K) Tile Id
-        tile_id_box = new_map_button_options.row(align=True).box()
+            #       (J) Scale sketch
+            # TODO: Either use the cast modifier or geometry nodes in 2.92
 
-        tile_id_row = tile_id_box.row(align=True)
+            #       (K) Tile Id
+            tile_id_box = new_map_button_options.row(align=True).box()
 
-        render_farm_checkbox = tile_id_row.column()
-        render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi tile?")
+            tile_id_row = tile_id_box.row(align=True)
 
-        if cvb.using_tile_id_prop:
-            tile_position = tile_id_row.column()
-            tile_position.enabled = False
-            tile_position.prop(cvb, "tile_position_prop", text="")
+            render_farm_checkbox = tile_id_row.column()
+            render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi tile?")
 
-        if cvb.using_tile_id_prop:
-            tile_id_stepper = tile_id_box.row(align=True)
-            tile_id_stepper.prop(cvb, "tile_id_prop", text="Tile #")
+            if cvb.using_tile_id_prop:
+                tile_position = tile_id_row.column()
+                tile_position.enabled = False
+                tile_position.prop(cvb, "tile_position_prop", text="")
+
+            if cvb.using_tile_id_prop:
+                tile_id_stepper = tile_id_box.row(align=True)
+                tile_id_stepper.prop(cvb, "tile_id_prop", text="Tile #")
 
 
         # (L) Generate city Group Box

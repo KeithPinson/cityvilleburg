@@ -24,6 +24,23 @@ class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name, line-too-long
     """Panel properties saved to the blend file"""
 
+    def decode_style(self, coded_style):
+
+        styles_found = \
+            [s[0] for s in self.sketch_style_list if s[0].startswith(coded_style)]
+
+        if styles_found:
+            style = styles_found[0]
+        else:
+            style = self.sketch_style_list[0][0]
+
+        return style
+
+    def encode_style(self, style):
+        result = style[0] if style else self.sketch_style_list[0][0][0]
+
+        return result
+
     def update_seed(self, context):
         """Seed update"""
         cvb = context.scene.CVB
@@ -135,7 +152,6 @@ class CVB_PanelProperties(PropertyGroup):
         name="Variant",
         description="""Sketch variant""",
         default=0, min=0, max=999)
-
 
 
 def cvb_panel_register():

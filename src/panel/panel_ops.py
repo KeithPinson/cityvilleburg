@@ -8,8 +8,6 @@ import bpy
 from bpy.types import Operator
 from ..utils.collection_utils import collection_add
 
-# save for later => from .citysketchname_props import CVB_CityNameProperties
-
 
 class CVB_OT_NewSketchButton(Operator):
     # pylint: disable=invalid-name
@@ -35,5 +33,7 @@ class CVB_OT_NewSketchButton(Operator):
 
         # Refresh the list after we've done everything
         cvb.city_props.refresh_sketch_list(cvb)
+
+        cvb.city_props.update_city_name_prop(context)
 
         return {"FINISHED"}
