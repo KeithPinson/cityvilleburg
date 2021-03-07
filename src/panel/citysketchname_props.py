@@ -39,16 +39,11 @@ def is_sketch_list_empty():
     return len(_CVB_SKETCH_LIST) == 0
 
 
-def is_import():
-    """Check to see if sketch is an import"""
-    return len(_CVB_SKETCHNAME.import_name) > 0
-
-
 class CVB_CityNameProperties(PropertyGroup):
     # pylint: disable=invalid-name
     """City Name / Sketch Name properties"""
 
-    def _get_properties(self, cvb, variant=-1, import_name=""):
+    def _get_properties(self, cvb, variant=-1):
 
         components = {
             'city': "",
@@ -58,8 +53,8 @@ class CVB_CityNameProperties(PropertyGroup):
             'y': "",
             'tile': "",
             'variant': 0,
-            'import_name': import_name
-        } if import_name else {
+            'import_name': cvb.import_name_prop
+        } if len(cvb.import_name_prop) > 0 else {
             'city': self.city_name_prop,
             'seed': cvb.seed_prop,
             'style': cvb.sketch_style_prop,
@@ -294,7 +289,7 @@ class CVB_CityNameProperties(PropertyGroup):
         if sketch:
             if len(sketch.import_name) > 0:
                 cvb.city_props.city_panel_header_prop = "Cityvilleburg – Import"
-                cvb.city_props.sketch_name_prop = sketch.import_name            # import_name
+                cvb.import_name_prop = sketch.get_import_name()                 # import_name
             else:
                 cvb.city_props.city_panel_header_prop = "Cityvilleburg"
                 cvb.city_props.sketch_name_prop = sketch.get_sketch_name()      # sketch_name
@@ -305,6 +300,7 @@ class CVB_CityNameProperties(PropertyGroup):
                 cvb.sketch_y_prop = sketch.get_y()                              # y
                 cvb.tile_id_prop = sketch.get_tile()                            # tile
                 cvb.variant_prop = sketch.get_variant()                         # variant
+                cvb.import_name_prop = ""                                       # import_name
 
     city_name_prop: StringProperty(
         name="",
@@ -317,7 +313,7 @@ class CVB_CityNameProperties(PropertyGroup):
 
     city_panel_header_prop: StringProperty(
         name="",
-        description="""City name""",
+        description="",
         default="Cityvilleburg")
 
     sketch_name_prop: StringProperty(

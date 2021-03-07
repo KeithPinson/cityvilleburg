@@ -76,6 +76,11 @@ class CVB_PanelProperties(PropertyGroup):
 
     city_props: PointerProperty(type=CVB_CityNameProperties)
 
+    import_name_prop: StringProperty(
+        name="",
+        description="""Imported Sketch""",
+        default="")
+
     seed_prop: IntProperty(
         name="Seed",
         description="""Reproducible random sketch id""",
