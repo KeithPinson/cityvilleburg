@@ -117,6 +117,7 @@ class CVB_CityNameProperties(PropertyGroup):
         #
         # 3. Insert the pending sketch name that may be added
         #
+        # if(len(sketches_found) == imports_found)
         pending_sketch_name = cvb.city_props.sketch_name_with_no_variant(cvb)
 
         sketches_found = [sk for sk in _CVB_SKETCH_LIST if sk.sketch_name.startswith(pending_sketch_name)]

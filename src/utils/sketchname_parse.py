@@ -54,7 +54,7 @@ def build_sketchname_string(city, seed, style, x, y, tile="", variant=0, import_
         # We are going to enforce the same rules for file names
         t_name = format_file_name(import_name)
 
-        sketch_name = """{name}""".format(name=t_name)
+        sketch_name = """{name}1_g1x1""".format(name=t_name)
 
         return sketch_name
 
