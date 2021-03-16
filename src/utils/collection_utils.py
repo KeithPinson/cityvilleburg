@@ -67,7 +67,7 @@ def collection_exist(path_string):
             coll = coll.children[sketchname]
 
             for sub_parts in parts[2:]:
-                coll = coll.children[sub_parts + " ~ " + sketchname]
+                coll = coll.children[sub_parts]
 
         except KeyError:
             return False
@@ -87,7 +87,7 @@ def collection_children(path_string):
 
         try:
             last_i = len(parts) - 1
-            key = parts[last_i] if last_i < 2 else parts[last_i] + " ~ " + parts[1]
+            key = parts[last_i]
 
             coll = bpy.data.collections.get(key)
 
@@ -114,7 +114,7 @@ def collection_verify(path_string):
     try:
         for i in range(len(parts)):
 
-            key = parts[i] if i < 2 else parts[i] + " ~ " + parts[1]
+            key = parts[i]
 
             coll = bpy.data.collections.get(key)
 
@@ -145,7 +145,7 @@ def collection_first_missing(path_string):
 
         for i in range(len(parts)):
 
-            key = parts[i] if i < 2 else parts[i] + " ~ " + parts[1]
+            key = parts[i]
 
             coll = bpy.data.collections.get(key)
 
@@ -216,10 +216,10 @@ def new_collection_node(path_string, index):
         # Skip this and just add the Root (eg CVB)
         return new_root_node(path_string)
 
-    key = parts[index] if index < 2 else "{} ~ {}".format(parts[index], parts[1])
+    key = parts[index]
 
     parent_i = index - 1
-    parent_key = parts[parent_i] if parent_i < 2 else "{} ~ {}".format(parts[parent_i], parts[1])
+    parent_key = parts[parent_i]
 
     parent_node = bpy.data.collections.get(parent_key)
 
