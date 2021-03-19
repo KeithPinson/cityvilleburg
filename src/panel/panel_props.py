@@ -20,7 +20,7 @@ from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
 # pylint: disable=relative-beyond-top-level
 from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
-from ..utils.collection_utils import collection_tail
+from ..utils.collection_utils import viewlayer_collections
 from ..utils.object_utils import object_get, object_get_or_add_empty, object_parent_all
 
 
@@ -107,19 +107,18 @@ class CVB_PanelProperties(PropertyGroup):
         """Toggle the mini sketch"""
         self.mini_sketch_add_or_toggle(value)
 
-    def sketch_visibility_toggle(self, is_visible=True ):
+    def sketch_visibility_toggle(self, is_visible=True):
         """Turns the visibility of the sketch off or on"""
         cvb = bpy.context.scene.CVB
 
         sketch_name = cvb.city_props.sketch_name_prop if not \
             len(cvb.import_name_prop) > 0 else ""
 
-        if not sketch_name:
-            return
+        if sketch_name:
+            scene = viewlayer_collections("/CVB/{0}/Sketch ~ {0}".format(sketch_name))
 
-        coll = collection_tail("/CVB/{0}/Sketch ~ {0}".format(sketch_name))
-
-
+            if scene:
+                scene.exclude = not is_visible
 
     def update_seed(self, context):
         """Seed update"""
@@ -134,7 +133,6 @@ class CVB_PanelProperties(PropertyGroup):
     def update_sketch_visibility(self, context):
         """Toggle visibility of sketch layer"""
         cvb = context.scene.CVB
-        cvb.sketch_visible_prop = not cvb.sketch_visible_prop
         self.sketch_visibility_toggle(cvb.sketch_visible_prop)
 
     def update_sketch_xy_linked(self, context):
@@ -196,7 +194,7 @@ class CVB_PanelProperties(PropertyGroup):
         name="Sketch Visibility",
         description="""Toggle Sketch Visibility""" if
         not is_sketch_list_empty() else "Inactive until New Sketch",
-        default=not is_sketch_list_empty(),
+        default=True,
         update=update_sketch_visibility)
 
     sketch_xy_linked_prop: IntProperty(

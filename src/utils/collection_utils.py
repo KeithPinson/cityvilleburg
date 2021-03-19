@@ -301,3 +301,26 @@ def path_object(path_string):
             return None
 
     return blender_object
+
+
+def viewlayer_collections(path_string):
+    """Down a hidden path can be found a switch to toggle view layer exclusions.
+
+        Usage: viewlayer_collections( "/A/Path/String" ).exclude = True
+    """
+
+    scene = None
+
+    parts = extract_path(path_string)
+
+    if parts:
+        try:
+            scene = bpy.context.view_layer.layer_collection.children[parts[0]]
+
+            for i in range(1, len(parts)):
+                scene = scene.children[parts[i]]
+
+        except KeyError:
+            return None
+
+    return scene
