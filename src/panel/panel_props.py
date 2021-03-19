@@ -20,7 +20,7 @@ from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
 # pylint: disable=relative-beyond-top-level
 from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
-from ..utils.collection_utils import viewlayer_collections
+from ..utils.collection_utils import viewlayer_collections, collection_sibling_names
 from ..utils.object_utils import object_get, object_get_or_add_empty, object_parent_all
 
 
@@ -77,6 +77,14 @@ class CVB_PanelProperties(PropertyGroup):
     def mini_sketch_add_or_toggle(self, is_mini=True):
         """Adds or modifies the Transform empty to change the size of the sketch"""
 
+        #
+        # Requirements:
+        #   1. Shrink the size of the sketch and related map,terrain,city to
+        #      to a footprint factor of 10x10 to 20x~0 depending on aspect ratio
+        #   2. Center sketch to the tile zero position
+        #   3. Hide any other sketches and related maps,terrains,cities
+        #
+
         cvb = bpy.context.scene.CVB
 
         sketch_name = cvb.city_props.sketch_name_prop if not \
@@ -85,15 +93,65 @@ class CVB_PanelProperties(PropertyGroup):
         if not sketch_name:
             return
 
+        # Make sure the view layers are in sync
+        scene = viewlayer_collections("/CVB/{0}".format(sketch_name))
+
+        if scene:
+            scene.exclude = False
+
+        self.sketch_visibility_toggle(cvb.sketch_visible_prop)
+
+        #
+        # 1. Shrink Sketch
+        #
+
         # Use the props for size rather than extracting size from sketch name
         size = (cvb.sketch_xy_linked_prop, cvb.sketch_xy_linked_prop) if \
             cvb.using_tile_id_prop else (cvb.sketch_x_prop, cvb.sketch_y_prop)
 
         factor = _mini_factor(size, 10)
 
-        cvb_path = "/CVB/{0}".format(sketch_name)
+        empty = self.parent_to_sketch(sketch_name)
+
+        if empty:
+            empty.scale = (factor, factor, factor) if is_mini else (1, 1, 1)
+
+        #
+        # 2. Center to Tile Zero
+        #
+        tile_position = 0 if is_mini else cvb.tile_id_prop
+        self.move_tile_position(empty, tile_position)
+
+        #
+        # 3. Hide other Sketches
+        #
+        sketch_path = "/CVB/{0}".format(sketch_name)
+        sibling_sketch_names = collection_sibling_names(sketch_path)
+
+        for sibling_sketch_name in sibling_sketch_names:
+            scene = viewlayer_collections("/CVB/{0}".format(sibling_sketch_name))
+
+            if scene:
+                scene.exclude = is_mini
+
+            # To keep everything toggling in sync make sure these are not mini
+            empty = self.parent_to_sketch(sibling_sketch_name)
+
+            if empty:
+                empty.scale = (1, 1, 1)
+
+    def move_tile_position(self, empty, tile_id):
+
+        if empty:
+            # TODO: Get position based off tile_id
+            pass
+
+    def parent_to_sketch(self, sketch_name):
+
+        sketch_path = "/CVB/{0}".format(sketch_name)
         empty_name = "{0} Transform".format(sketch_name)
-        empty = object_get_or_add_empty(cvb_path, empty_name, radius=0.12, display_type='CUBE')
+        empty = object_get_or_add_empty(
+            sketch_path, empty_name, radius=0.12, display_type='CUBE')
 
         if empty:
             object_parent_all(empty, "/CVB/{0}/Sketch ~ {0}".format(sketch_name))
@@ -101,7 +159,7 @@ class CVB_PanelProperties(PropertyGroup):
             object_parent_all(empty, "/CVB/{0}/Terrain ~ {0}".format(sketch_name))
             object_parent_all(empty, "/CVB/{0}/City ~ {0}".format(sketch_name))
 
-            empty.scale = (factor, factor, factor) if is_mini else (1, 1, 1)
+        return empty
 
     def set_mini_sketch(self, value):
         """Toggle the mini sketch"""

@@ -149,6 +149,31 @@ def collection_remove(path_string):
     print(path_string)
 
 
+def collection_sibling_names(path_string):
+    """Return a list of collection siblings"""
+    siblings = []
+
+    parts = extract_path(path_string)
+
+    try:
+        last_i = len(parts) - 1
+
+        coll = bpy.data.collections[parts[0]]
+
+        for i in range(1, last_i):
+            coll = coll.children[parts[i]]
+
+        if coll:
+            for sibling_coll in coll.children:
+                if sibling_coll.name != parts[last_i]:
+                    siblings.append(sibling_coll.name)
+
+    except KeyError:
+        return []
+
+    return siblings
+
+
 def collection_tail(path_string):
     """Walk the path, return the tail collection"""
 

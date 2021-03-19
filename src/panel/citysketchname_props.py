@@ -282,6 +282,12 @@ class CVB_CityNameProperties(PropertyGroup):
             [item[3] for item in _CVB_SKETCH_NAME_ENUMS if item[0] == this_name].pop()
 
         #
+        # Make sure the visibility settings are correct
+        #
+        cvb.mini_sketch_add_or_toggle(cvb.sketch_minimized_prop)
+        cvb.sketch_visibility_toggle(cvb.sketch_visible_prop)
+
+        #
         # Update panel properties based on sketchname
         #
         sketches = [sk for sk in _CVB_SKETCH_LIST if sk.sketch_name == this_name]
