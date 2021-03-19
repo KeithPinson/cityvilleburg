@@ -65,6 +65,21 @@ def object_get_or_add_empty(collection_path, empty_name, radius=1.0, display_typ
     return empty_object
 
 
+def object_make_active(object_path_and_name):
+
+    # Clear the selections
+    for obj in bpy.data.objects:
+        obj.select_set(False)
+
+    obj = object_get(object_path_and_name)
+
+    if obj and obj.type == 'MESH':
+        bpy.context.view_layer.objects.active = obj
+        bpy.context.view_layer.objects.active.select_set(True)
+
+    return obj
+
+
 def object_parent_all(blender_object, collection_path_and_name):
     """Parent all child objects found at the path to the Blender object"""
     child_names = collection_objects(collection_path_and_name)

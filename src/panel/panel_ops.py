@@ -7,7 +7,8 @@
 import bpy
 from bpy.types import Operator
 from ..utils.collection_utils import collection_add
-from ..utils.object_utils import object_add, object_get_or_add_empty, object_parent_all
+from ..utils.object_utils import\
+    object_add, object_get_or_add_empty, object_parent_all, object_make_active
 from ..citySketch import sketch_object
 
 
@@ -48,7 +49,7 @@ class CVB_OT_NewSketchButton(Operator):
         collection_add(sketch_path)
 
         # Sketch Object
-        sketch_name = "Sketch"
+        sketch_name = "{0} Sketch".format(new_sketchname)
         object_add(sketch_path, sketch_name, sketch_object.CitySketch(sketch_name, size[0], size[1]).obj)
 
         # Transform Empty
@@ -59,9 +60,17 @@ class CVB_OT_NewSketchButton(Operator):
         if empty:
             object_parent_all(empty, sketch_path)
 
+        # Active Object
+        sketch_path_and_name = sketch_path + "/" + sketch_name
+        object_make_active(sketch_path_and_name)
+
         # Refresh the list after we've done everything
         cvb.city_props.refresh_sketch_list(cvb)
 
         cvb.city_props.update_city_name_prop(context)
+
+        # And Lastly, Show Minimized
+        cvb.sketch_minimized_prop = True
+        cvb.mini_sketch_add_or_toggle(True)
 
         return {"FINISHED"}
