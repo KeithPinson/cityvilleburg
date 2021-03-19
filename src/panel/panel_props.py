@@ -12,12 +12,30 @@
 #
 # Copyright (c) 2021 Keith Pinson
 
+from math import isclose
+
 import bpy
 from bpy.types import PropertyGroup
 from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
 # pylint: disable=relative-beyond-top-level
 from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
+from ..utils.collection_utils import collection_tail
+from ..utils.object_utils import object_get, object_get_or_add_empty, object_parent_all
+
+
+def _mini_factor(t, n):
+    """For a square scale vector: factor will result in a NxN x, y geometry"""
+    # This is intended for tiles. As the lengths of x and y diverge, the
+    # resulting geometry will approach 2Nx0
+    f = 1
+
+    if len(t) > 1:
+        a = t[0]
+        b = t[1]
+        f = 2*n / (a + b) if (a + b) > 0 else 1
+
+    return f
 
 
 class CVB_PanelProperties(PropertyGroup):
@@ -41,6 +59,68 @@ class CVB_PanelProperties(PropertyGroup):
 
         return result
 
+    def get_mini_sketch(self):
+        """Check the size of the Transform empty to determine if mini sketch"""
+        is_full = True
+
+        cvb = bpy.context.scene.CVB
+        sketch_name = cvb.city_props.sketch_name_prop
+
+        # Get the empty
+        transform_object = object_get("/CVB/{0}/{0} Transform".format(sketch_name))
+
+        if transform_object and hasattr(transform_object, "scale") and transform_object.scale:
+            is_full = isclose(1.0, transform_object.scale[0], abs_tol=0.0001)
+
+        return not is_full
+
+    def mini_sketch_add_or_toggle(self, is_mini=True):
+        """Adds or modifies the Transform empty to change the size of the sketch"""
+
+        cvb = bpy.context.scene.CVB
+
+        sketch_name = cvb.city_props.sketch_name_prop if not \
+            len(cvb.import_name_prop) > 0 else ""
+
+        if not sketch_name:
+            return
+
+        # Use the props for size rather than extracting size from sketch name
+        size = (cvb.sketch_xy_linked_prop, cvb.sketch_xy_linked_prop) if \
+            cvb.using_tile_id_prop else (cvb.sketch_x_prop, cvb.sketch_y_prop)
+
+        factor = _mini_factor(size, 10)
+
+        cvb_path = "/CVB/{0}".format(sketch_name)
+        empty_name = "{0} Transform".format(sketch_name)
+        empty = object_get_or_add_empty(cvb_path, empty_name, radius=0.12, display_type='CUBE')
+
+        if empty:
+            object_parent_all(empty, "/CVB/{0}/Sketch ~ {0}".format(sketch_name))
+            object_parent_all(empty, "/CVB/{0}/Map ~ {0}".format(sketch_name))
+            object_parent_all(empty, "/CVB/{0}/Terrain ~ {0}".format(sketch_name))
+            object_parent_all(empty, "/CVB/{0}/City ~ {0}".format(sketch_name))
+
+            empty.scale = (factor, factor, factor) if is_mini else (1, 1, 1)
+
+    def set_mini_sketch(self, value):
+        """Toggle the mini sketch"""
+        self.mini_sketch_add_or_toggle(value)
+
+    def sketch_visibility_toggle(self, is_visible=True ):
+        """Turns the visibility of the sketch off or on"""
+        cvb = bpy.context.scene.CVB
+
+        sketch_name = cvb.city_props.sketch_name_prop if not \
+            len(cvb.import_name_prop) > 0 else ""
+
+        if not sketch_name:
+            return
+
+        coll = collection_tail("/CVB/{0}/Sketch ~ {0}".format(sketch_name))
+
+
+
     def update_seed(self, context):
         """Seed update"""
         cvb = context.scene.CVB
@@ -53,6 +133,9 @@ class CVB_PanelProperties(PropertyGroup):
 
     def update_sketch_visibility(self, context):
         """Toggle visibility of sketch layer"""
+        cvb = context.scene.CVB
+        cvb.sketch_visible_prop = not cvb.sketch_visible_prop
+        self.sketch_visibility_toggle(cvb.sketch_visible_prop)
 
     def update_sketch_xy_linked(self, context):
         """Sketch xy linked update"""
@@ -86,6 +169,13 @@ class CVB_PanelProperties(PropertyGroup):
         description="""Reproducible random sketch id""",
         default=1, min=1, max=32_767,
         update=update_seed)
+
+    sketch_minimized_prop: BoolProperty(
+        name="Mini Sketch Toggle",
+        description="""Toggle Sketch Size""" if
+        not is_sketch_list_empty() else "Inactive until New Sketch",
+        get=get_mini_sketch,
+        set=set_mini_sketch)
 
     # First letter of first element must be unique (it is used in city filename)
     sketch_style_list = [

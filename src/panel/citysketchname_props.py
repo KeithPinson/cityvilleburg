@@ -217,16 +217,22 @@ class CVB_CityNameProperties(PropertyGroup):
 
         props = self._get_properties(cvb)
 
-        plain_sketch_name = sketchname_parse.build_sketchname_string(
-            props['city'],
-            props['seed'],
-            cvb.encode_style(props['style']),
-            props['x'],
-            props['y'],
-            props['tile'],
-            0,
-            props['import_name'],
-            ascii_only=ascii_only)
+        if props['import_name']:
+            # Revert to the default
+            plain_sketch_name = sketchname_parse.build_sketchname_string(
+                "city", "1", "grid", "1000", "1000", "")
+
+        else:
+            plain_sketch_name = sketchname_parse.build_sketchname_string(
+                props['city'],
+                props['seed'],
+                cvb.encode_style(props['style']),
+                props['x'],
+                props['y'],
+                props['tile'],
+                0,
+                props['import_name'],
+                ascii_only=ascii_only)
 
         return plain_sketch_name
 

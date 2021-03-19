@@ -1,8 +1,13 @@
-"""Routines for creating and finding collections used by CVB"""
+"""Routines enforce a path system where collections are like
+folders and objects are like files"""
+#
 # pylint: disable=line-too-long
 #
 # All interactions with the Blender collections should be
-# done through these routines.
+# done through these routines. Since collections and objects
+# can be moved, renamed, or deleted, we use a path and file
+# system where we treat collections as paths and objects as
+# files.
 #
 # Blender's internal structure is peculiar enough that some
 # explanation is necessary. A collection is not a tree that
@@ -50,29 +55,12 @@ import bpy
 
 def extract_path(path_string):
     """Convert a path string to a list of names"""
-    return re.findall("[^/]+", path_string)
+    return re.findall(r"[^/\\]+", path_string)
 
 
-def collection_exist(path_string):
-    """Walk the collection path, return true if it can be completed"""
-
-    parts = extract_path(path_string)
-
-    if parts:
-
-        try:
-            coll = bpy.data.collections[parts[0]]
-
-            sketchname = parts[1]
-            coll = coll.children[sketchname]
-
-            for sub_parts in parts[2:]:
-                coll = coll.children[sub_parts]
-
-        except KeyError:
-            return False
-
-    return True
+def is_path_terminated(path_string):
+    """Check to see if path is terminated with a slash"""
+    return True if re.match(r".+[/\\]$", path_string) else False
 
 
 def collection_children(path_string):
@@ -100,103 +88,95 @@ def collection_children(path_string):
     return children
 
 
-def collection_verify(path_string):
-    # pylint: disable=consider-using-enumerate
-    """Walk the collection path, verify that links are correct"""
+def collection_objects(path_string):
+    """Return the list of objects at the path location,
+    make no distinction between failure and a path with no objects"""
 
-    missing_node_was_found = False
-
-    parts = extract_path(path_string)
-
-    if not parts:
-        return False
-
-    try:
-        for i in range(len(parts)):
-
-            key = parts[i]
-
-            coll = bpy.data.collections.get(key)
-
-            if coll is not None and missing_node_was_found:
-                return False
-
-            if coll is None:
-                missing_node_was_found = True
-
-    except KeyError:
-        return False
-
-    return True
-
-
-def collection_first_missing(path_string):
-    # pylint: disable=consider-using-enumerate
-    """Walk the collection path, find the first missing"""
-
-    first_missing_found_at = -1
+    blender_objects = []
 
     parts = extract_path(path_string)
 
-    if not parts:
-        return first_missing_found_at
+    if parts:
 
-    try:
-
-        for i in range(len(parts)):
-
-            key = parts[i]
+        try:
+            last_i = len(parts) - 1
+            key = parts[last_i]
 
             coll = bpy.data.collections.get(key)
 
-            if coll is None:
-                first_missing_found_at = i
-                break
+            if coll:
+                blender_objects = coll.objects.keys()
 
-    except KeyError:
-        return -1
+        except KeyError:
+            return []
 
-    return first_missing_found_at
+    return blender_objects
 
 
 def collection_add(path_string):
+    """Walk the path and add collections that may be missing"""
+    # Fail if the path already exists
+
     # pylint: disable=consider-using-enumerate
-    """Walk the list and add the tail end that may be missing."""
-    # We cannot try to add nodes with the same name. We need to verify only
-    # the tail end nodes need to be added, otherwise fail.
-
-    result = False
-
-    # First verify the integrity of the collections
-    if not collection_verify(path_string):
-        return result
-
-    add_at = collection_first_missing(path_string)
-
-    if add_at == -1:
-        return result
 
     parts = extract_path(path_string)
 
-    if not parts:
-        return result
+    part_added = ""
 
-    result = True
-    for i in range(add_at, len(parts)):
+    # Check for and add the root collection if needed
+    try:
+        coll = bpy.data.collections[parts[0]]
+    except KeyError:
+        coll = new_root_node(path_string)
+        part_added = parts[0]
 
-        new_node = new_collection_node(path_string, i)
+    # Check for and add missing child collections
+    for i in range(1, len(parts)):
+        try:
+            if coll:
+                coll = coll.children[parts[i]]
 
-        if not new_node:
-            result = False
-            break
+        except KeyError:
+            coll = new_collection_node(path_string, i)
+            part_added = parts[i]
 
-    return result
+    return part_added
 
 
 def collection_remove(path_string):
     """Remove the collection; will not remove root"""
     # TODO: Finish collection_remove()
     print(path_string)
+
+
+def collection_tail(path_string):
+    """Walk the path, return the tail collection"""
+
+    # pylint: disable=consider-using-enumerate
+
+    coll = None
+
+    parts = extract_path(path_string)
+
+    if parts:
+
+        try:
+            last_i = len(parts) - 1
+
+            coll = bpy.data.collections[parts[0]]
+
+            for i in range(1, len(parts)):
+                if i != last_i or \
+                        is_path_terminated(path_string) or \
+                        coll.children.get(parts[i]):
+                    coll = coll.children[parts[i]]  # Collection
+                else:
+                    break                           # Blender Object
+
+        except KeyError:
+            return None
+
+    return coll
 
 
 def new_collection_node(path_string, index):
@@ -263,3 +243,61 @@ def new_root_node(path_string):
         return None
 
     return new_node
+
+
+def path_found(path_string):
+    """Walk the path, return true if it exists"""
+
+    # pylint: disable=consider-using-enumerate
+
+    parts = extract_path(path_string)
+
+    if parts:
+
+        try:
+            last_i = len(parts) - 1
+
+            coll = bpy.data.collections[parts[0]]
+
+            for i in range(1, len(parts)):
+                if i != last_i or \
+                        is_path_terminated(path_string) or \
+                        coll.children.get(parts[i]):
+                    coll = coll.children[parts[i]]  # Collection
+                else:
+                    coll = coll.objects[parts[i]]   # Blender Object
+
+        except KeyError:
+            return False
+
+    return True
+
+
+def path_object(path_string):
+    """Walk the path, return object if it exists"""
+
+    # pylint: disable=consider-using-enumerate
+
+    blender_object = None
+
+    parts = extract_path(path_string)
+
+    if parts:
+
+        try:
+            last_i = len(parts) - 1
+
+            coll = bpy.data.collections[parts[0]]
+
+            for i in range(1, len(parts)):
+                if i != last_i or \
+                        is_path_terminated(path_string) or \
+                        coll.children.get(parts[i]):
+                    coll = coll.children[parts[i]]  # Collection
+                else:
+                    blender_object = coll.objects[parts[i]]   # Blender Object
+
+        except KeyError:
+            return None
+
+    return blender_object

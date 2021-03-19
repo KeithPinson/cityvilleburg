@@ -231,16 +231,19 @@ class CVB_PT_Main(Panel):
             sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
         #       Hide/Scale Row
-        hide_scale_row = new_map_button_options.row(align=True)
+        hide_scale_row = new_map_button_options.row(align=True).column().split(factor=0.66)
 
         #       (I) Hide sketch
-        hide_sketch_checkbox = hide_scale_row.column()
+        hide_sketch_checkbox = hide_scale_row
 
         hide_sketch_checkbox.enabled = are_sketches_in_list
         hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
 
         #       (J) Scale sketch
-        # TODO: Either use the cast modifier or geometry nodes in 2.92
+        scale_sketch_checkbox = hide_scale_row
+
+        scale_sketch_checkbox.enabled = are_sketches_in_list
+        scale_sketch_checkbox.prop(cvb, "sketch_minimized_prop", text="Mini?")
 
         #       (K) Tile Id
         tile_id_box = new_map_button_options.row(align=True).box()
