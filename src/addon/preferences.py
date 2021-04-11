@@ -38,9 +38,15 @@ class CVB_AddonPreferences(AddonPreferences):
     )
 
     cvb_asset_folder_prop: \
-        StringProperty("File Path",
+        StringProperty(name="File Path",
                        default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
                        subtype='DIR_PATH')
+
+    cvb_terrain_region_length: IntProperty(
+        name='Terrain Region Map Length',
+        description="Length of Regional Terrain Map",
+        default=100_000,
+    )
 
     def draw(self, context):
         # pylint: disable=unused-argument,no-member
