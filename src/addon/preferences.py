@@ -42,16 +42,35 @@ class CVB_AddonPreferences(AddonPreferences):
                        default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
                        subtype='DIR_PATH')
 
-    cvb_terrain_region_length: IntProperty(
-        name='Terrain Region Map Length',
-        description="Length of Regional Terrain Map",
-        default=100_000,
+    cvb_terrain_region_metric: IntProperty(
+        name='Metric',
+        description="Given a metric m, the region size is (m*2+1)^2 tiles across",
+        min=1,
+        max=16,
+        default=5,
     )
 
     def draw(self, context):
         # pylint: disable=unused-argument,no-member
         """Override of AddonPreferences draw() method"""
         preferences_column = self.layout.column()
+
+        # Regional Size Entry; using the formula, (m*2+1)^2 tiles across
+        region_size = preferences_column.box()
+
+        #       Label
+        region_size_label = region_size.row().column().split()
+        region_size_label.label(text='Region Size')
+
+        #       Field
+        region_size_field = region_size_label
+        region_size_field.prop(self, 'cvb_terrain_region_metric', slider=True)
+
+        #       Translation
+        region_size_translation = region_size_field
+        region_size_translation.column()
+        s = (self.cvb_terrain_region_metric*2+1)**2
+        region_size_translation.label(text="{} by {} tiles".format(s,s))
 
         # Assets Folder Entry
         assets_folder = preferences_column.box()
