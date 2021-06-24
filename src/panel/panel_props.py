@@ -22,6 +22,8 @@ from bpy.props import (
 from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
 from ..utils.collection_utils import viewlayer_collections, collection_sibling_names
 from ..utils.object_utils import object_get, object_get_or_add_empty, object_parent_all
+from ..addon.preferences import cvb_prefs
+
 
 
 def _mini_factor(t, n):
@@ -165,6 +167,18 @@ class CVB_PanelProperties(PropertyGroup):
         """Toggle the mini sketch"""
         self.mini_sketch_add_or_toggle(value)
 
+    def set_seed(self, value):
+        """Keeps the addon preference seed in sync"""
+
+        print("set_seed", value)
+        if cvb_prefs(bpy.context):
+            cvb_seed_prop = cvb_prefs(bpy.context).cvb_seed
+
+            if cvb_seed_prop:
+                cvb_seed_prop = value
+                print("   cvb_seed", cvb_prefs(bpy.context).cvb_seed)
+
+
     def sketch_visibility_toggle(self, is_visible=True):
         """Turns the visibility of the sketch off or on"""
         cvb = bpy.context.scene.CVB
@@ -182,6 +196,7 @@ class CVB_PanelProperties(PropertyGroup):
         """Seed update"""
         cvb = context.scene.CVB
         cvb.city_props.refresh_sketch_list(cvb)
+        self.set_seed(cvb.seed_prop)
 
     def update_sketch_style(self, context):
         """Sketch style update"""
@@ -282,16 +297,18 @@ class CVB_PanelProperties(PropertyGroup):
         default=1000,
         update=update_sketch_y)
 
+    max_tile = (cvb_prefs(bpy.context).cvb_terrain_region_order * 9)**2-1 if cvb_prefs(bpy.context) else 99999
+
     tile_id_prop: IntProperty(
         name="",
         description="""Unique ID of tile""",
-        default=0, min=0, max=32_767,
+        default=0, min=0, max=max_tile,
         update=update_tile_id)
 
     tile_position_prop: StringProperty(
         name="",
         description="""Matrix position from central tile""",
-        default="+000 +003")
+        default="+000 +000")
 
     using_tile_id_prop: BoolProperty(
         name="Multi-file Renders",

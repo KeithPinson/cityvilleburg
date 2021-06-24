@@ -11,7 +11,7 @@
 
 import bpy
 from bpy.types import Panel, Operator
-from ..addon.preferences import cvb_icon
+from ..addon.preferences import cvb_icon, cvb_prefs
 from .citysketchname_props import is_sketch_list_empty
 
 

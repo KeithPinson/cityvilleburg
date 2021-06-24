@@ -8,6 +8,7 @@
 # Copyright (c) 2021 Keith Pinson
 
 import pathlib
+import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, IntProperty
 from ..utils.icons import IconCollection
@@ -25,9 +26,8 @@ class CVB_AddonPreferences(AddonPreferences):
     # should try to do our own late binding (no reason
     # to tie up resources unnecessarily)
     #
-    cvb_icons = None
-    cvb_thumbnails = None
-    cvb_properties = None
+    cvb_icon_list = None
+    cvb_thumbnail_list = None
 
     # This seed is hidden and should match the value in the N-panel
     cvb_seed: IntProperty(
@@ -42,12 +42,12 @@ class CVB_AddonPreferences(AddonPreferences):
                        default=str(pathlib.Path(__file__).parent.parent.parent.joinpath('assets')),
                        subtype='DIR_PATH')
 
-    cvb_terrain_region_metric: IntProperty(
-        name='Metric',
-        description="Given a metric m, the region size is (m*2+1)^2 tiles across",
+    cvb_terrain_region_order: IntProperty(
+        name='Nth Order',
+        description="Given an Order n, the region size is (n*9) tiles across",
         min=1,
-        max=16,
-        default=5,
+        max=35,
+        default=11,
     )
 
     def draw(self, context):
@@ -55,7 +55,7 @@ class CVB_AddonPreferences(AddonPreferences):
         """Override of AddonPreferences draw() method"""
         preferences_column = self.layout.column()
 
-        # Regional Size Entry; using the formula, (m*2+1)^2 tiles across
+        # Regional Size Entry; using the formula, (n*9) tiles across
         region_size = preferences_column.box()
 
         #       Label
@@ -64,13 +64,13 @@ class CVB_AddonPreferences(AddonPreferences):
 
         #       Field
         region_size_field = region_size_label
-        region_size_field.prop(self, 'cvb_terrain_region_metric', slider=True)
+        region_size_field.prop(self, 'cvb_terrain_region_order', slider=True)
 
         #       Translation
         region_size_translation = region_size_field
         region_size_translation.column()
-        s = (self.cvb_terrain_region_metric*2+1)**2
-        region_size_translation.label(text="{} by {} tiles".format(s,s))
+        s = (self.cvb_terrain_region_order*9)
+        region_size_translation.label(text="{} by {} tiles".format(s, s))
 
         # Assets Folder Entry
         assets_folder = preferences_column.box()
@@ -91,13 +91,13 @@ class CVB_AddonPreferences(AddonPreferences):
 
 def cvb_addon_register():
     """Lower level support to register"""
-    CVB_AddonPreferences.cvb_icons = IconCollection()
+    CVB_AddonPreferences.cvb_icon_list = IconCollection()
 
 
 def cvb_addon_unregister():
     """Lower level support for unregistering"""
-    if CVB_AddonPreferences.cvb_icons is not None:
-        del CVB_AddonPreferences.cvb_icons
+    if CVB_AddonPreferences.cvb_icon_list is not None:
+        del CVB_AddonPreferences.cvb_icon_list
 
 
 def cvb_prefs(context):
@@ -107,6 +107,6 @@ def cvb_prefs(context):
 
 def cvb_icon(context, icon_name):
     """Late binding support of add-on icons"""
-    cvb_icons = cvb_prefs(context).cvb_icons
+    cvb_icons = cvb_prefs(context).cvb_icon_list
 
     return cvb_icons.get_icon_id(icon_name)

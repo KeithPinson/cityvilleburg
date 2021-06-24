@@ -12,7 +12,7 @@ import bpy.utils.previews
 class IconCollection:
     icons_collection = None
     file_dir = os.path.dirname(__file__)
-    icons_dir = pathlib.Path(file_dir).parent.parent.joinpath('res')
+    icons_dir = pathlib.Path(file_dir).parent.parent.joinpath('assets')
 
     def __init__(self):
         self.icons_collection = bpy.utils.previews.new()
