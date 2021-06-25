@@ -169,15 +169,9 @@ class CVB_PanelProperties(PropertyGroup):
 
     def set_seed(self, value):
         """Keeps the addon preference seed in sync"""
-
-        print("set_seed", value)
         if cvb_prefs(bpy.context):
-            cvb_seed_prop = cvb_prefs(bpy.context).cvb_seed
-
-            if cvb_seed_prop:
-                cvb_seed_prop = value
-                print("   cvb_seed", cvb_prefs(bpy.context).cvb_seed)
-
+            if cvb_prefs(bpy.context).cvb_seed:
+                cvb_prefs(bpy.context).cvb_seed = value
 
     def sketch_visibility_toggle(self, is_visible=True):
         """Turns the visibility of the sketch off or on"""
