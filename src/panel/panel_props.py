@@ -22,7 +22,7 @@ from bpy.props import (
 from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
 from ..utils.collection_utils import viewlayer_collections, collection_sibling_names
 from ..utils.object_utils import object_get, object_get_or_add_empty, object_parent_all
-from ..addon.preferences import cvb_prefs
+from ..utils.fass_grid import fassGrid
 
 
 
@@ -43,6 +43,8 @@ def _mini_factor(t, n):
 class CVB_PanelProperties(PropertyGroup):
     # pylint: disable=invalid-name, line-too-long
     """Panel properties saved to the blend file"""
+
+    _grid = fassGrid()
 
     def decode_style(self, coded_style):
 
@@ -220,7 +222,16 @@ class CVB_PanelProperties(PropertyGroup):
     def update_tile_id(self, context):
         """Impacts the file name """
         cvb = context.scene.CVB
+        (x,y)  = self._grid.get_tile_xy(cvb.tile_id_prop)
+        cvb.tile_position_prop = "{0:+04d} {1:+04d}".format(x,y)
         cvb.city_props.refresh_sketch_list(cvb)
+
+    # def update_tile_position(self, context):
+    #     """Translation of tile id to position"""
+    #     cvb = context.scene.CVB
+    #     cvb.sketch_xy_linked_prop =
+    #     (x,y)  = self._grid.get_tile_xy(cvb.tile_id_prop)
+    #     print(cvb.tile_id_prop, "{0:+04d} {1:+04d}".format(x,y))
 
     city_props: PointerProperty(type=CVB_CityNameProperties)
 
@@ -291,18 +302,17 @@ class CVB_PanelProperties(PropertyGroup):
         default=1000,
         update=update_sketch_y)
 
-    max_tile = (cvb_prefs(bpy.context).cvb_terrain_region_order * 9)**2-1 if cvb_prefs(bpy.context) else 99999
-
     tile_id_prop: IntProperty(
         name="",
         description="""Unique ID of tile""",
-        default=0, min=0, max=max_tile,
+        default=0, min=0, max=_grid.get_last_tile(),
         update=update_tile_id)
 
     tile_position_prop: StringProperty(
         name="",
         description="""Matrix position from central tile""",
         default="+000 +000")
+        # update=update_tile_position)
 
     using_tile_id_prop: BoolProperty(
         name="Multi-file Renders",
