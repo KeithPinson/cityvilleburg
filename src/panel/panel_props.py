@@ -223,7 +223,10 @@ class CVB_PanelProperties(PropertyGroup):
         """Impacts the file name """
         cvb = context.scene.CVB
         (x,y)  = self._grid.get_tile_xy(cvb.tile_id_prop)
-        cvb.tile_position_prop = "{0:+04d} {1:+04d}".format(x,y)
+        # Default font bfont.ttf (DejaVu Sans) use of hyphen represents minus sign poorly
+        coords = "{0:+04d} {1:+04d}".format(x,y)
+        coords = coords.replace("-", "\u2212")  # replace hyphen with minus sign
+        cvb.tile_position_prop = coords
         cvb.city_props.refresh_sketch_list(cvb)
 
     # def update_tile_position(self, context):
