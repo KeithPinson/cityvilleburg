@@ -7,6 +7,40 @@
 # The panel properties can be found in the
 # bpy.context.scene.CVB object.
 #
+# After registering, the panels will be inserted automatically
+# as specified by the bl_category and bl_order.
+#
+#   The N-panel has the following hierarchical outline:
+#
+#       Cityvileburg
+#       ------------
+#
+#       (i) New Map
+#
+#           (1) City Sketch Settings
+#
+#               (A) Sketch Generate
+#               (B) Sketch Select
+#               (C) City Name
+#               (D) Seed
+#               (E) City Style
+#               (F) Tile Size
+#
+#           (2) Display Controls
+#
+#               (G) Show Sketch
+#               (H) Show Miniature size
+#               (I) Tile ID
+#
+#           (3) Sketch Edit
+#
+#           (4) Terrain Edit
+#
+#       (ii) Generate City
+#
+#       Help
+#       ----
+#
 # Copyright (c) 2021 Keith Pinson
 
 import bpy
@@ -28,70 +62,61 @@ class CVB_PT_Main(Panel):
         layout = self.layout
         self.layout.label(text=context.scene.CVB.city_props.city_panel_header_prop)
 
-    # (A) New Map Group Box
-    #     -----------------
-    #
     #   Cities are composed of multiple layers:
     #
-    #       (1) Sketch
-    #       (2) Map
-    #       (3) Terrain
-    #       (4) City
+    #       - Sketch
+    #       - Map
+    #       - Terrain
+    #       - City
     #
     #   A sketch is used to make a map. A map and terrain combine to make a city.
-    #   Changes to any layer can have affects up and down the layers. Cities which
-    #   are composed of many parts can be manipulated to effect the map and the
-    #   terrain. And, changing the map, changes the sketch.
+    #   Changes to any one layer can have affect layers above and below.
     #
-    #   (B) New Map Button  (doubles as section title)
+    #       Sketch -> Map, Map + Terrain -> City
     #
-    #       Sketch Options: draw_n_panel()
-    #       -or-
-    #       Import Option: draw_n_panel_for_imports()
+    #   Additionally, maps are broken up so that they can be worked on and rendered
+    #   in sizes that are manageable, these are referred to as tiles and the array of tiles
+    #   is the grid. The default tile size is 1000 by 1000 meters and the default grid size
+    #   is 99 by 99 tiles.
     #
-    # (L) Generate city Group Box
-    #     -----------------------
-    #
-    #   (M) Generate city Button
-
-    def draw(self, context):
+    def draw(self, context):   # <== This is the Roman Numeral level; break everything into the respective hierarchy
         """Draw the main N-key panel either normally or for imports"""
 
         #
-        # This is called everytime the mouse enter an element's border
+        # This is called everytime the mouse enters an element's border
         #
 
         cvb = context.scene.CVB
 
         panel_column = self.layout
 
-        # (A) New Map Group Box
         new_map_group_box = panel_column.box()
 
-        # (B) New Map Button
-        new_map_button = new_map_group_box.row(align=True)
-        new_map_button.scale_y = 1.3
-        new_map_button.operator("cvb.new_map_button",
-                                text="New Map",
-                                icon_value=cvb_icon(context, "icon-new-map-l"))
+        # (i) New Map
+        self.draw_new_map_button(context, new_map_group_box)
 
-        # New Map Options Box
+        #     (1) City Sketch Settings
         new_map_button_options = new_map_group_box.box()
 
         if len(cvb.import_name_prop) > 0:
-            self.draw_n_panel_for_imports(context, new_map_button_options)
+            self.draw_city_sketch_settings_for_imports(context, new_map_button_options)
         else:
-            self.draw_n_panel(context, new_map_button_options)
+            self.draw_city_sketch_settings(context, new_map_button_options)
 
-        # (L) Generate city Group Box
-        generate_city_group_box = panel_column.box()
+        #     (2) Display Controls
+        self.draw_display_controls(context, new_map_group_box.box())
 
-        # (M) Generate city Button
-        generate_city_button = generate_city_group_box.row(align=True)
-        generate_city_button.scale_y = 1.3
-        generate_city_button.operator("cvb.gen_city_button",
-                                      text="Generate city",
-                                      icon_value=cvb_icon(context, "icon-gen-city-l"))
+        edit_buttons = new_map_group_box.box()
+        edit_buttons_row = edit_buttons.row(align=True)
+
+        #     (3) Sketch Edit
+        self.draw_sketch_edit_button(context, edit_buttons_row)
+
+        #     (4) Terrain Edit
+        self.draw_terrain_edit_button(context, edit_buttons_row)
+
+        # (ii) Generate City
+        self.draw_generate_city_button(context, panel_column.box())
 
         cvb.city_props.refresh_sketch_name(cvb)
 
@@ -174,14 +199,24 @@ class CVB_PT_Main(Panel):
     #
     #          - Change Map to be square
     #
+    #       (L) Sketch Edit
+    #       (M) Terrain Edit
 
-    def draw_n_panel(self, context, layout):
+    #           (1) City Sketch Settings
+    #
+    #               (A) Sketch Generate
+    #               (B) Sketch Select
+    #               (C) City Name
+    #               (D) Seed
+    #               (E) City Style
+    #               (F) Tile Size
+    #
+
+    def draw_city_sketch_settings(self, context, layout):
         # pylint: disable=too-many-locals
         """Draw the main N-key panel"""
 
         cvb = context.scene.CVB
-
-        are_sketches_in_list = not is_sketch_list_empty()
 
         new_map_button_options = layout
 
@@ -230,38 +265,6 @@ class CVB_PT_Main(Panel):
             sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
             sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
-        #       Hide/Scale Row
-        hide_scale_row = new_map_button_options.row(align=True).column().split(factor=0.66)
-
-        #       (I) Hide sketch
-        hide_sketch_checkbox = hide_scale_row
-
-        hide_sketch_checkbox.enabled = are_sketches_in_list
-        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
-
-        #       (J) Scale sketch
-        scale_sketch_checkbox = hide_scale_row
-
-        scale_sketch_checkbox.enabled = are_sketches_in_list
-        scale_sketch_checkbox.prop(cvb, "sketch_minimized_prop", text="Mini?")
-
-        #       (K) Tile Id
-        tile_id_box = new_map_button_options.row(align=True).box()
-
-        tile_id_row = tile_id_box.row(align=True)
-
-        render_farm_checkbox = tile_id_row.column()
-        render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi tile?")
-
-        if cvb.using_tile_id_prop:
-            tile_position = tile_id_row.column()
-            tile_position.enabled = False
-            tile_position.prop(cvb, "tile_position_prop", text="")
-
-        if cvb.using_tile_id_prop:
-            tile_id_stepper = tile_id_box.row(align=True)
-            tile_id_stepper.prop(cvb, "tile_id_prop", text="Tile #")
-
         cvb.city_props.refresh_sketch_name(cvb)
 
     #
@@ -273,7 +276,7 @@ class CVB_PT_Main(Panel):
     #
     #          - Import name is displayed as the selected enumerator
     #
-    def draw_n_panel_for_imports(self, context, layout):
+    def draw_city_sketch_settings_for_imports(self, context, layout):
         """Draw the main N-key panel for imports"""
 
         cvb = context.scene.CVB
@@ -292,6 +295,89 @@ class CVB_PT_Main(Panel):
             text="",
             icon_only=True,
             icon='MESH_GRID')
+
+    #           (2) Display Controls
+    #
+    #               (G) Show Sketch
+    #               (H) Show Miniature size
+    #               (I) Tile ID
+    #
+    #           (3) Sketch Edit
+    #
+    #           (4) Terrain Edit
+
+    def draw_generate_city_button(self, context, layout):
+        """Draw the Generate City Button"""
+
+        generate_city_button = layout.row(align=True)
+        generate_city_button.scale_y = 1.3
+        generate_city_button.operator("cvb.gen_city_button",
+                                      text="Generate city",
+                                      icon_value=cvb_icon(context, "icon-gen-city-l"))
+
+    def draw_new_map_button(self, context, layout):
+        """Draw the New Map Button"""
+
+        new_map_button = layout.row(align=True)
+        new_map_button.scale_y = 1.3
+        new_map_button.operator("cvb.new_map_button",
+                                text="New Map",
+                                icon_value=cvb_icon(context, "icon-new-map-l"))
+
+    def draw_display_controls(self, context, layout):
+        """Draw the Display Controls"""
+
+        cvb = context.scene.CVB
+
+        are_sketches_in_list = not is_sketch_list_empty()
+
+        #       Hide/Scale Row
+        hide_scale_row = layout.row(align=True).column().split(factor=0.66)
+
+        #       (I) Hide sketch
+        hide_sketch_checkbox = hide_scale_row
+
+        hide_sketch_checkbox.enabled = are_sketches_in_list
+        hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
+
+        #       (J) Scale sketch
+        scale_sketch_checkbox = hide_scale_row
+
+        scale_sketch_checkbox.enabled = are_sketches_in_list
+        scale_sketch_checkbox.prop(cvb, "sketch_minimized_prop", text="Mini?")
+
+        #       (K) Tile Id
+        tile_id_box = layout.row(align=True).box()
+
+        tile_id_row = tile_id_box.row(align=True)
+
+        render_farm_checkbox = tile_id_row.column()
+        render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi tile?")
+
+        if cvb.using_tile_id_prop:
+            tile_position = tile_id_row.column()
+            tile_position.enabled = False
+            tile_position.prop(cvb, "tile_position_prop", text="")
+
+        if cvb.using_tile_id_prop:
+            tile_id_stepper = tile_id_box.row(align=True)
+            tile_id_stepper.prop(cvb, "tile_id_prop", text="Tile #")
+
+
+
+    def draw_sketch_edit_button(self, context, layout):
+        """Draw the Sketch Edit Button"""
+        sketch_edit_button = layout.row(align=True)
+        sketch_edit_button.scale_y = 1.1
+        sketch_edit_button.operator("cvb.sketch_edit_button",
+                                    text="Sketch Edit")
+
+    def draw_terrain_edit_button(self, context, layout):
+        """Draw the Terrain Edit Button"""
+        terrain_edit_button = layout.row(align=True)
+        terrain_edit_button.scale_y = 1.1
+        terrain_edit_button.operator("cvb.terrain_edit_button",
+                                    text="Terrain")
 
 
 class CVB_PT_Help(Panel):
@@ -350,6 +436,44 @@ class CVB_OT_GenCityButton(Operator):
 
     def execute(self, context):
         # Generate the city
+        bpy.ops.mesh.primitive_cube_add()
+
+        return {"FINISHED"}
+
+
+class CVB_OT_SketchEditButton(Operator):
+    # pylint: disable=invalid-name
+    """Sketch Edit Button"""
+    bl_idname = 'cvb.sketch_edit_button'
+    bl_label = 'Sketch Edit'
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = """Edit the city sketch"""
+
+    def execute(self, context):
+        # if previous map layers
+        # if( False ):
+        #     pass  # Hide the previous layers
+
+        # Create the new map
+        bpy.ops.mesh.primitive_cube_add()
+
+        return {"FINISHED"}
+
+
+class CVB_OT_TerrainEditButton(Operator):
+    # pylint: disable=invalid-name
+    """Terrain Edit Button"""
+    bl_idname = 'cvb.terrain_edit_button'
+    bl_label = 'Terrain Edit'
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = """Edit the terrain"""
+
+    def execute(self, context):
+        # if previous map layers
+        # if( False ):
+        #     pass  # Hide the previous layers
+
+        # Create the new map
         bpy.ops.mesh.primitive_cube_add()
 
         return {"FINISHED"}

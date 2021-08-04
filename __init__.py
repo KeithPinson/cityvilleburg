@@ -48,6 +48,7 @@ register_class(CVB_AddonPreferences)
 
 # Now that the addon preferences are loaded, import the modules with properties
 from .src.panel.n_key_panel import CVB_PT_Main, CVB_OT_NewMapButton, CVB_OT_GenCityButton
+from .src.panel.n_key_panel import CVB_OT_SketchEditButton, CVB_OT_TerrainEditButton
 from .src.panel.n_key_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
 from .src.panel.panel_ops import CVB_OT_NewSketchButton
 from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
@@ -64,6 +65,8 @@ _CLASS_REGISTRY = (
     CVB_OT_GenCityButton,
     CVB_OT_GettingStartedHelp,
     CVB_OT_NewSketchButton,
+    CVB_OT_SketchEditButton,
+    CVB_OT_TerrainEditButton,
     CVB_PT_Main,
     CVB_PT_Help,
 )
