@@ -110,7 +110,7 @@ class CVB_PT_Main(Panel):
         edit_buttons_row = edit_buttons.row(align=True)
 
         #     (3) Sketch Edit
-        self.draw_sketch_edit_button(context, edit_buttons_row)
+        self.draw_city_sketch_button(context, edit_buttons_row)
 
         #     (4) Terrain Edit
         self.draw_terrain_edit_button(context, edit_buttons_row)
@@ -365,19 +365,28 @@ class CVB_PT_Main(Panel):
 
 
 
-    def draw_sketch_edit_button(self, context, layout):
+    def draw_city_sketch_button(self, context, layout):
         """Draw the Sketch Edit Button"""
+
+        cvb = context.scene.CVB
+
         sketch_edit_button = layout.row(align=True)
         sketch_edit_button.scale_y = 1.1
+        # sketch_edit_button.prop(cvb, "visible_city_sketch_prop", text="")
         sketch_edit_button.operator("cvb.sketch_edit_button",
-                                    text="Sketch Edit")
+                                    text="City Sketch",
+                                    depress=cvb.visible_city_sketch_prop)
 
     def draw_terrain_edit_button(self, context, layout):
         """Draw the Terrain Edit Button"""
+
+        cvb = context.scene.CVB
+
         terrain_edit_button = layout.row(align=True)
         terrain_edit_button.scale_y = 1.1
         terrain_edit_button.operator("cvb.terrain_edit_button",
-                                    text="Terrain")
+                                     text="Terrain",
+                                     depress=cvb.visible_terrain_editor_prop)
 
 
 class CVB_PT_Help(Panel):
@@ -443,21 +452,27 @@ class CVB_OT_GenCityButton(Operator):
 
 class CVB_OT_SketchEditButton(Operator):
     # pylint: disable=invalid-name
-    """Sketch Edit Button"""
+    """City Sketch Button"""
     bl_idname = 'cvb.sketch_edit_button'
-    bl_label = 'Sketch Edit'
-    bl_options = {"REGISTER", "UNDO"}
+    bl_label = 'City Sketch'
+    bl_options = {"INTERNAL"}
     bl_description = """Edit the city sketch"""
 
     def execute(self, context):
-        # if previous map layers
-        # if( False ):
-        #     pass  # Hide the previous layers
 
-        # Create the new map
-        bpy.ops.mesh.primitive_cube_add()
+        cvb = context.scene.CVB
 
-        return {"FINISHED"}
+        cvb.visible_city_sketch_prop = not cvb.visible_city_sketch_prop
+
+        if cvb.visible_city_sketch_prop:
+            cvb.visible_terrain_editor_prop = False
+
+        print("city/terrain:", cvb.visible_city_sketch_prop, cvb.visible_terrain_editor_prop)
+
+        if cvb.visible_city_sketch_prop:
+            return {"RUNNING_MODAL"}
+        else:
+            return {"FINISHED"}
 
 
 class CVB_OT_TerrainEditButton(Operator):
@@ -465,18 +480,24 @@ class CVB_OT_TerrainEditButton(Operator):
     """Terrain Edit Button"""
     bl_idname = 'cvb.terrain_edit_button'
     bl_label = 'Terrain Edit'
-    bl_options = {"REGISTER", "UNDO"}
+    bl_options = {"INTERNAL"}
     bl_description = """Edit the terrain"""
 
     def execute(self, context):
-        # if previous map layers
-        # if( False ):
-        #     pass  # Hide the previous layers
 
-        # Create the new map
-        bpy.ops.mesh.primitive_cube_add()
+        cvb = context.scene.CVB
 
-        return {"FINISHED"}
+        cvb.visible_terrain_editor_prop = not cvb.visible_terrain_editor_prop
+
+        if cvb.visible_terrain_editor_prop:
+            cvb.visible_city_sketch_prop = False
+
+        print("city/terrain:", cvb.visible_city_sketch_prop, cvb.visible_terrain_editor_prop)
+
+        if cvb.visible_terrain_editor_prop:
+            return {"RUNNING_MODAL"}
+        else:
+            return {"FINISHED"}
 
 
 class CVB_OT_GettingStartedHelp(Operator):

@@ -328,6 +328,16 @@ class CVB_PanelProperties(PropertyGroup):
         description="""Sketch variant""",
         default=0, min=0, max=999)
 
+    visible_city_sketch_prop: BoolProperty(
+        name="City Sketch Visible",
+        description="""Is City Sketch Visible""",
+        default=False)
+
+    visible_terrain_editor_prop: BoolProperty(
+        name="Terrain Editor Visible",
+        description="""Is Terrain Editor Visible""",
+        default=False)
+
 
 def cvb_panel_register():
     """Panel properties to register"""
