@@ -59,8 +59,12 @@ class CVB_PT_Main(Panel):
     bl_order = 1
 
     def draw_header(self, context):
-        layout = self.layout
-        self.layout.label(text=context.scene.CVB.city_props.city_panel_header_prop)
+        cvb = context.scene.CVB
+
+        if cvb.visible_sketch_settings_prop:
+            self.layout.label(text=cvb.city_props.city_panel_header_prop)
+        else:
+            self.layout.label(text='CVB – ' + cvb.city_props.sketch_name_prop)
 
     #   Cities are composed of multiple layers:
     #
@@ -372,7 +376,6 @@ class CVB_PT_Main(Panel):
 
         sketch_edit_button = layout.row(align=True)
         sketch_edit_button.scale_y = 1.1
-        # sketch_edit_button.prop(cvb, "visible_city_sketch_prop", text="")
         sketch_edit_button.operator("cvb.sketch_edit_button",
                                     text="City Sketch",
                                     depress=cvb.visible_city_sketch_prop)
@@ -467,7 +470,10 @@ class CVB_OT_SketchEditButton(Operator):
         if cvb.visible_city_sketch_prop:
             cvb.visible_terrain_editor_prop = False
 
-        print("city/terrain:", cvb.visible_city_sketch_prop, cvb.visible_terrain_editor_prop)
+        if cvb.visible_city_sketch_prop or cvb.visible_terrain_editor_prop:
+            cvb.visible_sketch_settings_prop = False
+        else:
+            cvb.visible_sketch_settings_prop = True
 
         if cvb.visible_city_sketch_prop:
             return {"RUNNING_MODAL"}
@@ -492,7 +498,10 @@ class CVB_OT_TerrainEditButton(Operator):
         if cvb.visible_terrain_editor_prop:
             cvb.visible_city_sketch_prop = False
 
-        print("city/terrain:", cvb.visible_city_sketch_prop, cvb.visible_terrain_editor_prop)
+        if cvb.visible_city_sketch_prop or cvb.visible_terrain_editor_prop:
+            cvb.visible_sketch_settings_prop = False
+        else:
+            cvb.visible_sketch_settings_prop = True
 
         if cvb.visible_terrain_editor_prop:
             return {"RUNNING_MODAL"}

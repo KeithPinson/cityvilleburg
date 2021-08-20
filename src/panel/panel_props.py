@@ -333,6 +333,11 @@ class CVB_PanelProperties(PropertyGroup):
         description="""Is City Sketch Visible""",
         default=False)
 
+    visible_sketch_settings_prop: BoolProperty(
+        name="Sketch Settings Visible",
+        description="""Are Sketch Settings Visible""",
+        default=True)
+
     visible_terrain_editor_prop: BoolProperty(
         name="Terrain Editor Visible",
         description="""Is Terrain Editor Visible""",
