@@ -52,6 +52,7 @@ from .citysketchname_props import is_sketch_list_empty
 class CVB_PT_Main(Panel):
     # pylint: disable=invalid-name
     """Main Panel of the N-Key Panels"""
+    bl_idname = "CVB_PT_Main"
     bl_label = ''  # Leave blank and use draw_header()
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -100,23 +101,25 @@ class CVB_PT_Main(Panel):
         self.draw_new_map_button(context, new_map_group_box)
 
         #     (1) City Sketch Settings
-        new_map_button_options = new_map_group_box.box()
+        if cvb.visible_sketch_settings_prop:
+            new_map_button_options = new_map_group_box.box()
 
-        if len(cvb.import_name_prop) > 0:
-            self.draw_city_sketch_settings_for_imports(context, new_map_button_options)
-        else:
-            self.draw_city_sketch_settings(context, new_map_button_options)
+            if len(cvb.import_name_prop) > 0:
+                self.draw_city_sketch_settings_for_imports(context, new_map_button_options)
+            else:
+                self.draw_city_sketch_settings(context, new_map_button_options)
 
         #     (2) Display Controls
         self.draw_display_controls(context, new_map_group_box.box())
 
+        #      Edit Buttons
         edit_buttons = new_map_group_box.box()
         edit_buttons_row = edit_buttons.row(align=True)
 
-        #     (3) Sketch Edit
+        #     (3) Sketch Edit  --  toggle cvb.visible_city_sketch_prop
         self.draw_city_sketch_button(context, edit_buttons_row)
 
-        #     (4) Terrain Edit
+        #     (4) Terrain Edit  --  toggle cvb.visible_terrain_editor_prop
         self.draw_terrain_edit_button(context, edit_buttons_row)
 
         # (ii) Generate City
