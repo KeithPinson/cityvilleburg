@@ -27,7 +27,6 @@ class CVB_OT_TerrainEdit(Operator):
         cvb = context.scene.CVB
 
 
-
 class CVB_PT_Terrain(Panel):
     bl_idname = "CVB_PT_Terrain"
     # bl_parent_id = "CVB_Main"
@@ -52,13 +51,28 @@ class CVB_PT_Terrain(Panel):
             return False
 
     def draw(self, context):
-        layout = self.layout
+        cvb = context.scene.CVB
 
         # props = tool.operator_properties("cvb.terrain_edit")
         # preferences = bpy.context.preferences.addons[__package__].preferences
 
-        col = layout.column()
-        col.label(text="River")
+        terrain_pens = self.layout.box()
+
+        print( dir(cvb) )
+        terrain_pens.prop(cvb.terrain_props, "terrain_pen_prop", text="Terrain Pen")
 
 
+        # river_pen_row = terrain_pens.row(align=True)
+        #
+        # terrain_pen_row.prop(cvb, "terrain_river_pen_prop", text="River")
+        # terrain_pen_row.prop(cvb, "sketch_minimized_prop", text="Mini?")
+
+        # col = layout.column()
+        # col.label(text="River")
+        # col.label(text="Ridge")
+        # col.label(text="Water")
+        # col.label(text="Tidal")
+        # col.label(text="Clear")
+        # col.label(text="Autogen")
+        # col.label(text="Help")
 

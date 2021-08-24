@@ -19,6 +19,7 @@ from bpy.types import PropertyGroup
 from bpy.props import (
     PointerProperty, StringProperty, IntProperty, BoolProperty, EnumProperty)
 # pylint: disable=relative-beyond-top-level
+from ..terrain.terrain_props import CVB_TerrainProperties
 from .citysketchname_props import CVB_CityNameProperties, is_sketch_list_empty
 from ..utils.collection_utils import viewlayer_collections, collection_sibling_names
 from ..utils.object_utils import object_get, object_get_or_add_empty, object_parent_all
@@ -237,6 +238,7 @@ class CVB_PanelProperties(PropertyGroup):
     #     print(cvb.tile_id_prop, "{0:+04d} {1:+04d}".format(x,y))
 
     city_props: PointerProperty(type=CVB_CityNameProperties)
+    terrain_props: PointerProperty(type=CVB_TerrainProperties)
 
     import_name_prop: StringProperty(
         name="",
@@ -346,6 +348,7 @@ class CVB_PanelProperties(PropertyGroup):
 
 def cvb_panel_register():
     """Panel properties to register"""
+    bpy.utils.register_class(CVB_TerrainProperties)
     bpy.utils.register_class(CVB_CityNameProperties)
     bpy.utils.register_class(CVB_PanelProperties)
     # pylint: disable=assignment-from-no-return
@@ -360,3 +363,4 @@ def cvb_panel_unregister():
 
     bpy.utils.unregister_class(CVB_PanelProperties)
     bpy.utils.unregister_class(CVB_CityNameProperties)
+    bpy.utils.unregister_class(CVB_TerrainProperties)
