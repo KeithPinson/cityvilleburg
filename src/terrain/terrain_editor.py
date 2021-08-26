@@ -58,21 +58,66 @@ class CVB_PT_Terrain(Panel):
 
         terrain_pens = self.layout.box()
 
-        print( dir(cvb) )
-        terrain_pens.prop(cvb.terrain_props, "terrain_pen_prop", text="Terrain Pen")
+        terrain_pens.prop(cvb.terrain_props, "terrain_pen_prop", text="Terrain Pen",
+                          expand=True, emboss=True )
 
+        terrain_buttons_row = terrain_pens.row(align=True)
 
-        # river_pen_row = terrain_pens.row(align=True)
-        #
-        # terrain_pen_row.prop(cvb, "terrain_river_pen_prop", text="River")
-        # terrain_pen_row.prop(cvb, "sketch_minimized_prop", text="Mini?")
+        # terrain_buttons_row.prop(cvb.terrain_props, "terrain_help_prop", text="?")
+        # terrain_buttons_row.prop(cvb.terrain_props, "terrain_clear_prop", text="Clear")
+        # terrain_buttons_row.prop(cvb.terrain_props, "terrain_autogen_prop", text="Autogen")
 
-        # col = layout.column()
-        # col.label(text="River")
-        # col.label(text="Ridge")
-        # col.label(text="Water")
-        # col.label(text="Tidal")
-        # col.label(text="Clear")
-        # col.label(text="Autogen")
-        # col.label(text="Help")
+        terrain_buttons_row.operator("cvb.terrain_help_button",
+                                     text="?",
+                                     depress=cvb.terrain_props.terrain_help_prop)
+
+        terrain_buttons_row.operator("cvb.terrain_clear_button",
+                                     text="clear",
+                                     depress=cvb.terrain_props.terrain_clear_prop)
+
+        terrain_buttons_row.operator("cvb.terrain_autogen_button",
+                                     text="autogen",
+                                     depress=cvb.terrain_props.terrain_autogen_prop)
+
+class CVB_OT_TerrainHelpButton(Operator):
+    # pylint: disable=invalid-name
+    """Terrain Help Button"""
+    bl_idname = 'cvb.terrain_help_button'
+    bl_label = 'Terrain Help'
+    bl_options = {"INTERNAL"}
+    bl_description = """Show Terrain Help Cheat Sheet"""
+
+    def execute(self, context):
+
+        cvb = context.scene.CVB
+
+        return {"FINISHED"}
+
+class CVB_OT_TerrainClearButton(Operator):
+    # pylint: disable=invalid-name
+    """Terrain Clear Button"""
+    bl_idname = 'cvb.terrain_clear_button'
+    bl_label = 'Terrain Clear'
+    bl_options = {"INTERNAL"}
+    bl_description = """Clear all terrain"""
+
+    def execute(self, context):
+
+        cvb = context.scene.CVB
+
+        return {"FINISHED"}
+
+class CVB_OT_TerrainAutogenButton(Operator):
+    # pylint: disable=invalid-name
+    """Terrain Autogen Button"""
+    bl_idname = 'cvb.terrain_autogen_button'
+    bl_label = 'Terrain Autogen'
+    bl_options = {"INTERNAL"}
+    bl_description = """Clear all terrain and auto-generate new"""
+
+    def execute(self, context):
+
+        cvb = context.scene.CVB
+
+        return {"FINISHED"}
 

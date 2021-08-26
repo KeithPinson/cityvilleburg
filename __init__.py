@@ -52,7 +52,8 @@ from .src.panel.n_key_panel import CVB_OT_SketchEditButton, CVB_OT_TerrainEditBu
 from .src.panel.n_key_panel import CVB_PT_Help, CVB_OT_GettingStartedHelp
 from .src.panel.panel_ops import CVB_OT_NewSketchButton
 from .src.panel.panel_props import cvb_panel_register, cvb_panel_unregister
-from .src.terrain.terrain_editor import CVB_PT_Terrain
+from .src.terrain.terrain_editor \
+    import CVB_PT_Terrain, CVB_OT_TerrainHelpButton, CVB_OT_TerrainClearButton, CVB_OT_TerrainAutogenButton
 
 
 # Ideally we should declare and define the hooks for the Blender
@@ -71,6 +72,9 @@ _CLASS_REGISTRY = (
     CVB_PT_Main,
     CVB_PT_Help,
     CVB_PT_Terrain,
+    CVB_OT_TerrainHelpButton,
+    CVB_OT_TerrainClearButton,
+    CVB_OT_TerrainAutogenButton,
 )
 
 def verify_classes(registry):
