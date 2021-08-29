@@ -22,12 +22,14 @@ class CVB_AddonPreferences(AddonPreferences):
     #
     # Serialized properties
     #
-    # Registration occurs when Blender is started so we
-    # should try to do our own late binding (no reason
-    # to tie up resources unnecessarily)
-    #
     cvb_icon_list = None
     cvb_thumbnail_list = None
+
+    #
+    # Pre-register Code Insert
+    #
+    cvb_icon_list = IconCollection()
+
 
     # This seed is hidden and should match the value in the N-panel
     cvb_seed: IntProperty(
@@ -91,7 +93,7 @@ class CVB_AddonPreferences(AddonPreferences):
 
 def cvb_addon_register():
     """Lower level support to register"""
-    CVB_AddonPreferences.cvb_icon_list = IconCollection()
+    # Moved to CVB_AddonPreferences : CVB_AddonPreferences.cvb_icon_list = IconCollection()
 
 
 def cvb_addon_unregister():
@@ -107,6 +109,9 @@ def cvb_prefs(context):
 
 def cvb_icon(context, icon_name):
     """Late binding support of add-on icons"""
-    cvb_icons = cvb_prefs(context).cvb_icon_list
+    if CVB_AddonPreferences.cvb_icon_list is not None:
+        cvb_icons = cvb_prefs(context).cvb_icon_list
 
-    return cvb_icons.get_icon_id(icon_name)
+        return cvb_icons.get_icon_id(icon_name)
+    else:
+        return None

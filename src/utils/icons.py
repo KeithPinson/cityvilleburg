@@ -15,7 +15,7 @@ class IconCollection:
     icons_dir = pathlib.Path(file_dir).parent.parent.joinpath('assets')
 
     def __init__(self):
-        self.icons_collection = bpy.utils.previews.new()
+        self.icons_collection = bpy.utils.previews.new()  # ImagePreviewCollection
 
     def __del__(self):
         if self.icons_collection is not None:
@@ -24,8 +24,9 @@ class IconCollection:
     def get_icon_id(self, name):
         found_icon = self.get_icon(name)
 
-        if found_icon.icon_size[0] == 0:
+        if not found_icon or found_icon.icon_size[0] == 0:
             print("Icon file not found: ", name)
+            return ''
 
         return found_icon.icon_id
 
@@ -33,4 +34,15 @@ class IconCollection:
         if name in self.icons_collection:
             return self.icons_collection[name]
 
-        return self.icons_collection.load(name, os.path.join(self.icons_dir, name + ".png"), "IMAGE")
+        file_path = os.path.join(self.icons_dir, name)
+
+        ext = None
+        if os.path.isfile(file_path + ".png"):
+            ext = ".png"
+        elif os.path.isfile(file_path + ".jpg"):
+            ext = ".jpg"
+        # "svg" not supported
+
+        preview = self.icons_collection.load(name, file_path + ext, "IMAGE") if ext else None
+
+        return preview
