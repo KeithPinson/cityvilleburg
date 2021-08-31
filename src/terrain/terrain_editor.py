@@ -60,12 +60,10 @@ class CVB_PT_Terrain(Panel):
 
         terrain_pens.prop(cvb.terrain_props, "terrain_pen_prop", text="Terrain Pen",
                           expand=True, emboss=True )
+        terrain_pens.scale_y = 1.3
+        terrain_pens.alignment = 'CENTER'
 
         terrain_buttons_row = terrain_pens.row(align=True)
-
-        # terrain_buttons_row.prop(cvb.terrain_props, "terrain_help_prop", text="?")
-        # terrain_buttons_row.prop(cvb.terrain_props, "terrain_clear_prop", text="Clear")
-        # terrain_buttons_row.prop(cvb.terrain_props, "terrain_autogen_prop", text="Autogen")
 
         terrain_buttons_row.operator("cvb.terrain_help_button",
                                      text="?",

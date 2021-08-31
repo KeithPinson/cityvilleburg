@@ -13,11 +13,11 @@ class CVB_TerrainProperties(PropertyGroup):
     """Terrain properties saved to the blend file"""
 
     terrain_pen_list = [
-        ('river', "River", "Pen to draw midline of river or stream", cvb_icon(bpy.context, "RiverPen"), 1),
-        ('ridge', "Ridge", "Pen to draw the ridge line", cvb_icon(bpy.context, 'RidgePen'), 2),
-        ('water', "Water", "Pen to mark the waterline of a pond or lake", cvb_icon(bpy.context, 'WaterPen'), 3),
-        ('tidal', "Tidal", "Pen to mark the high tide line of tidal water", 'FORCE_TURBULENCE', 4),
-        ('flatten', "Flatten", "Weakly fills the low spots and cuts down the high spots", 'AUTO', 5)
+        ('river', "River", "Pen to draw midline of river or stream", cvb_icon(bpy.context, "terrain_river_icon"), 1),
+        ('ridge', "Ridge", "Pen to draw the ridge line", cvb_icon(bpy.context, 'terrain_ridge_icon'), 2),
+        ('water', "Water", "Pen to mark the waterline of a pond or lake", cvb_icon(bpy.context, 'terrain_water_icon'), 3),
+        ('tidal', "Tidal", "Pen to mark the high tide line of tidal water", cvb_icon(bpy.context, 'terrain_tidal_icon'), 4),
+        ('flatten', "Flatten", "Weakly fills the low spots and cuts down the high spots", cvb_icon(bpy.context, 'terrain_flatten_icon'), 5)
     ]
 
     terrain_pen_prop: EnumProperty(
