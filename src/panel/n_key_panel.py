@@ -47,6 +47,7 @@ import bpy
 from bpy.types import Panel, Operator
 from ..addon.preferences import cvb_icon, cvb_prefs
 from .citysketchname_props import is_sketch_list_empty
+from ..terrain.terrain_editor import build_terrain_edit_rig, teardown_terrain_edit_rig
 
 
 class CVB_PT_Main(Panel):
@@ -468,11 +469,14 @@ class CVB_OT_SketchEditButton(Operator):
 
         cvb = context.scene.CVB
 
+        # Toggle the city sketch button
         cvb.visible_city_sketch_prop = not cvb.visible_city_sketch_prop
 
+        # Turn off the terrain button if city sketch turned on
         if cvb.visible_city_sketch_prop:
             cvb.visible_terrain_editor_prop = False
 
+        # Toggle the upper N-Panel settings off or on
         if cvb.visible_city_sketch_prop or cvb.visible_terrain_editor_prop:
             cvb.visible_sketch_settings_prop = False
         else:
@@ -496,19 +500,26 @@ class CVB_OT_TerrainEditButton(Operator):
 
         cvb = context.scene.CVB
 
+        # Toggle the terrain button
         cvb.visible_terrain_editor_prop = not cvb.visible_terrain_editor_prop
 
+        # Turn off the city sketch button if terrain is turned on
         if cvb.visible_terrain_editor_prop:
             cvb.visible_city_sketch_prop = False
 
+        # Toggle the upper N-Panel settings off or on
         if cvb.visible_city_sketch_prop or cvb.visible_terrain_editor_prop:
             cvb.visible_sketch_settings_prop = False
         else:
             cvb.visible_sketch_settings_prop = True
 
         if cvb.visible_terrain_editor_prop:
+            # Make terrain edit visible
+            build_terrain_edit_rig(context)
             return {"RUNNING_MODAL"}
         else:
+            # Hide terrain edit
+            teardown_terrain_edit_rig(context)
             return {"FINISHED"}
 
 

@@ -14,6 +14,16 @@ import bpy
 from bpy.types import Panel, Operator, WorkSpaceTool
 
 
+def build_terrain_edit_rig(context):
+
+    print("build_terrain_edit_rig()")
+
+
+def teardown_terrain_edit_rig(context):
+
+    print("teardown_terrain_edit_rig()")
+
+
 class CVB_OT_TerrainEdit(Operator):
     # pylint: disable=invalid-name
     """Terrain Editor"""
