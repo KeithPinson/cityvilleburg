@@ -12,9 +12,50 @@
 
 import bpy
 from bpy.types import Panel, Operator, WorkSpaceTool
+from ..utils.collection_utils import collection_add
+from ..utils.object_utils import\
+    object_add, object_get_or_add_empty, object_parent_all, object_make_active
+
+
+def terrain_outliner(context):
+    """Check to see if the terrain region map exists and add it if it does not."""
+
+    #
+    # Example Outliner:
+    #
+    # CVB [collection]
+    #   City1_g1x1.001 [collection]
+    #     .
+    #     .
+    #     .
+    #   Terrain [collection]        <-- This
+    #      Region_Map               <--   and this is what we need to check for
+
+    cvb = context.scene.CVB
+
+    size = 10
+    subdivision_per_meter = 8
+
+    # Collection
+    sketch_path = "/CVB/Terrain"
+    collection_add(sketch_path)
+
+    # Sketch Object
+    sketch_name = "Region_Map"
+    object_add(sketch_path, sketch_name, None)
 
 
 def build_terrain_edit_rig(context):
+
+    terrain_outliner(context)
+
+    cvb = context.scene.CVB
+
+    size = (cvb.sketch_xy_linked_prop, cvb.sketch_xy_linked_prop) if \
+        cvb.using_tile_id_prop else (cvb.sketch_x_prop, cvb.sketch_y_prop)
+
+    sketchname = cvb.city_props.get_sketch_name()
+    print(sketchname)
 
     print("build_terrain_edit_rig()")
 
@@ -33,6 +74,7 @@ class CVB_OT_TerrainEdit(Operator):
     bl_description = """Edit the Terrain"""
 
     def execute(self, context):
+        """Display the terrain editor, create terrain map if needed"""
 
         cvb = context.scene.CVB
 
@@ -69,7 +111,7 @@ class CVB_PT_Terrain(Panel):
         terrain_pens = self.layout.box()
 
         terrain_pens.prop(cvb.terrain_props, "terrain_pen_prop", text="Terrain Pen",
-                          expand=True, emboss=True )
+                          expand=True, emboss=True)
         terrain_pens.scale_y = 1.3
         terrain_pens.alignment = 'CENTER'
 

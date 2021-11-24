@@ -184,12 +184,7 @@ def format_city_name(city, max_length=100, ascii_only=False):
         t_city = t_city.strip("""\'""")
 
         # Remove <>:"/\|?* and _
-        t_city = format_file_name(t_city)
-        t_city = t_city.replace("_", "")  # Underscore is reserved as a delimiter in the sketchname
-
-        # Capitalize words and remove spaces
-        t_city = t_city.title()  # Make sure to remove underscores before calling this
-        t_city = t_city.replace(" ", "")
+        t_city = format_file_name(t_city)  # Underscore is reserved as a delimiter in the sketchname
 
         # Truncate the city name to an arbitrary number of characters
         if len(t_city) > max_length:
@@ -208,13 +203,22 @@ def format_city_name(city, max_length=100, ascii_only=False):
 
 
 def format_file_name(file_name):
-    """Format the string so that it is valid file format"""
+    """Format the string so that it is valid file format and to
+       avoid confusion make it sketchname compatible too."""
 
     try:
         t_file_name = file_name
 
-        # Remove <>:"/\|?* and _
-        t_file_name = re.sub(r"[<>:\"/\\|?*]", "", t_file_name)
+        # Remove []()<>:"/\|?*
+        t_file_name = re.sub(r"[\[\]\(\)<>\"/\\|\?\*]", "", t_file_name)
+
+        t_file_name = t_file_name.replace(":", " ")
+        t_file_name = t_file_name.replace("-", " ")
+        t_file_name = t_file_name.replace("_", " ")
+
+        # Capitalize words and remove spaces
+        t_file_name = t_file_name.title()  # Make sure to remove underscores before calling this
+        t_file_name = t_file_name.replace(" ", "")
 
     except TypeError:
         t_file_name = ""

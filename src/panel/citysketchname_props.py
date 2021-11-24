@@ -69,10 +69,26 @@ class CVB_CityNameProperties(PropertyGroup):
 
     def get_sketch_name(self):
 
-        sketch_name = _CVB_SKETCH_NAME_ENUMS[_CVB_SKETCH_NAME_ENUMS_NUM][1]\
-            if _CVB_SKETCH_NAME_ENUMS else "[City1_g1x1]"
+        sketch_name = "[City1_g1x1]"
+
+        if _CVB_SKETCH_NAME_ENUMS:
+            pending_name = _CVB_SKETCH_NAME_ENUMS[0][1]
+            selected_name = _CVB_SKETCHNAME.sketch_name
+
+            sketch_name = pending_name \
+                if pending_name == "[" + selected_name + "]" \
+                else _CVB_SKETCH_NAME_ENUMS[_CVB_SKETCH_NAME_ENUMS_NUM][1]
 
         return sketch_name
+
+    def is_get_sketch_name_pending(self):
+
+        sketch_name = self.get_sketch_name()
+
+        # Pending check by use of brackets in name rather than position in list
+        is_pending = sketch_name.startswith("[") and sketch_name.endswith("]")
+
+        return is_pending
 
     def refresh_sketch_list(self, cvb):
         """Rebuild sketch name strings by pulling from the Blender Collections"""
@@ -122,12 +138,11 @@ class CVB_CityNameProperties(PropertyGroup):
 
         sketches_found = [sk for sk in _CVB_SKETCH_LIST if sk.sketch_name.startswith(pending_sketch_name)]
 
-        if not sketches_found:
-            # Insert the pending first
-            pending_display_name = "[" + pending_sketch_name + "]"
-            enums.insert(
-                0,
-                (pending_sketch_name, pending_display_name, "Press + to generate sketch", 0))
+        # Insert the pending first, marked with brackets
+        pending_display_name = "[" + pending_sketch_name + "]"
+        enums.insert(
+            0,
+            (pending_sketch_name, pending_display_name, "Press + to generate sketch", 0))
 
         # Renumber the enums
         for i in range(len(enums)):
@@ -141,7 +156,8 @@ class CVB_CityNameProperties(PropertyGroup):
         #
         if sketches_found:
             ids_found = \
-                [item[3] for item in _CVB_SKETCH_NAME_ENUMS if item[0].startswith(pending_sketch_name)]
+                [item[3] for item in _CVB_SKETCH_NAME_ENUMS if item[0].startswith(_CVB_SKETCHNAME.sketch_name)]
+#                [item[3] for item in _CVB_SKETCH_NAME_ENUMS if item[0].startswith(pending_sketch_name)]
 
             if(ids_found):
                 _CVB_SKETCH_NAME_ENUMS_NUM = ids_found[-1:].pop()  # Use the last found
@@ -171,7 +187,7 @@ class CVB_CityNameProperties(PropertyGroup):
         cvb = context.scene.CVB
         cvb.city_props.refresh_sketch_list(cvb)
 
-        # We assume the global vars are upto data
+        # We assume the global vars are upto date
         global _CVB_SKETCH_NAME_ENUMS
 
         return _CVB_SKETCH_NAME_ENUMS
@@ -256,6 +272,8 @@ class CVB_CityNameProperties(PropertyGroup):
     def update_city_name_prop(self, context):
         """city_name_prop update callback"""
 
+        cvb = context.scene.CVB if context else bpy.context.scene.CVB
+
         # Do not set self.city_name_prop inside this callback, it
         # will cause runaway recursion
         name = self.city_name_prop
@@ -265,6 +283,8 @@ class CVB_CityNameProperties(PropertyGroup):
 
         global _CVB_SKETCH_NAME_ENUMS, _CVB_SKETCH_NAME_ENUMS_NUM
         current_sketch_name = _CVB_SKETCH_NAME_ENUMS[_CVB_SKETCH_NAME_ENUMS_NUM][0]
+
+        self.refresh_sketch_name(cvb)
 
     def update_sketch_name(self, context):
         """Update other properties based off of the sketch name"""
@@ -296,7 +316,7 @@ class CVB_CityNameProperties(PropertyGroup):
 
         if not sketch:
             # Derive the sketch from the sketch name
-            sketch = sketchname_parse.SketchName()
+            sketch = _CVB_SKETCHNAME
             sketch.string_to_sketchname(this_name)
 
         if sketch:

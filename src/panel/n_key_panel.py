@@ -17,24 +17,31 @@
 #
 #       (i) New Map
 #
-#           (1) City Sketch Settings
+#           (1) Sketch Select
 #
-#               (A) Sketch Generate
-#               (B) Sketch Select
-#               (C) City Name
+#               (A) Sketch Select Dropdown
+#
+#           (2) City Sketch Settings
+#
+#               (B) City Name
+#               (C) Sketch Generate
 #               (D) Seed
 #               (E) City Style
 #               (F) Tile Size
 #
-#           (2) Display Controls
+#           (3) Tile Select
 #
-#               (G) Show Sketch
-#               (H) Show Miniature size
-#               (I) Tile ID
+#               (G) Multi-tile Toggle
+#               (H) Tile ID
 #
-#           (3) Sketch Edit
+#           (3) Display Controls
 #
-#           (4) Terrain Edit
+#               (I) Show Sketch
+#               (J) Show Miniature size
+#
+#           (4) Sketch Edit
+#
+#           (5) Terrain Edit
 #
 #       (ii) Generate City
 #
@@ -101,26 +108,32 @@ class CVB_PT_Main(Panel):
         # (i) New Map
         self.draw_new_map_button(context, new_map_group_box)
 
-        #     (1) City Sketch Settings
+        #     (1) Sketch Select
+        self.draw_sketch_select(context, new_map_group_box.box())
+
+        #     (2) City Sketch Settings
         if cvb.visible_sketch_settings_prop:
-            new_map_button_options = new_map_group_box.box()
+            new_map_button_options = new_map_group_box
 
             if len(cvb.import_name_prop) > 0:
                 self.draw_city_sketch_settings_for_imports(context, new_map_button_options)
             else:
                 self.draw_city_sketch_settings(context, new_map_button_options)
 
-        #     (2) Display Controls
+        #     (3) Tile Select
+        self.draw_tile_select(context, new_map_group_box)
+
+        #     (4) Display Controls
         self.draw_display_controls(context, new_map_group_box.box())
 
         #      Edit Buttons
         edit_buttons = new_map_group_box.box()
         edit_buttons_row = edit_buttons.row(align=True)
 
-        #     (3) Sketch Edit  --  toggle cvb.visible_city_sketch_prop
+        #     (4) Sketch Edit  --  toggle cvb.visible_city_sketch_prop
         self.draw_city_sketch_button(context, edit_buttons_row)
 
-        #     (4) Terrain Edit  --  toggle cvb.visible_terrain_editor_prop
+        #     (5) Terrain Edit  --  toggle cvb.visible_terrain_editor_prop
         self.draw_terrain_edit_button(context, edit_buttons_row)
 
         # (ii) Generate City
@@ -128,24 +141,6 @@ class CVB_PT_Main(Panel):
 
         cvb.city_props.refresh_sketch_name(cvb)
 
-    #
-    #  Sketch Options:
-    #
-    #      (C) City Name Entry Field
-    #
-    #          - City Name as a simple string without the seed, size and other
-    #            parameter. It is editable.
-    #
-    #          - It must be filename compatible
-    #
-    #      (D) New Button
-    #
-    #          - Displayed name is added to City Names
-    #
-    #          - Name field is enabled and can be changed
-    #
-    #          - No variant until sketch itself is edited
-    #
     #      (E) Sketch Name Drop-Down Box
     #
     #          - Sketch names are displayed
@@ -169,13 +164,8 @@ class CVB_PT_Main(Panel):
     #                            with 001
     #
     #          - Editing name is disabled if no seed,type,size match
-    #
-    #      (F) Seed: A number used to make a reproducible random sketch
-    #
-    #          - Integer: 1 to 2^15-1
-    #          - Back/Next Stepper Buttons
-    #
-    #      (G) Map Style Drop down
+
+    #      Map Style Drop down
     #
     #          'grid'
     #              Grid Plan City
@@ -189,36 +179,15 @@ class CVB_PT_Main(Panel):
     #          'western'
     #              Western City Style
     #              (A town built along a thoroughfare; water, rail, or road)
-    #
+
     #      (H) Map X: Size and Y: Size (in meter integers)
-    #
+
     #      (I) Hide sketch Checkbox
-    #
+
     #      (J) Scale sketch Checkbox
     #
     #          - Toggle between the Map X,Y size and a proportion equivalent of the
     #            shortest dimension to 10 Meters
-    #
-    #      (K) Tile Id Checkbox
-    #
-    #          - Sequential positive decimal number starting with zero
-    #
-    #          - Display tile distance in positive/negative, x and y offsets from tile zero
-    #
-    #          - Change Map to be square
-    #
-    #       (L) Sketch Edit
-    #       (M) Terrain Edit
-
-    #           (1) City Sketch Settings
-    #
-    #               (A) Sketch Generate
-    #               (B) Sketch Select
-    #               (C) City Name
-    #               (D) Seed
-    #               (E) City Style
-    #               (F) Tile Size
-    #
 
     def draw_city_sketch_settings(self, context, layout):
         # pylint: disable=too-many-locals
@@ -226,52 +195,46 @@ class CVB_PT_Main(Panel):
 
         cvb = context.scene.CVB
 
+        sketchname = cvb.city_props.get_sketch_name()
+        sketch_is_pending = cvb.city_props.is_get_sketch_name_pending()
+
         new_map_button_options = layout
 
-        #       city Name Entry Row
-        city_name_entry = new_map_button_options.row(align=True).box()
+        if sketch_is_pending:
+            #       city Name Entry Row
+            city_name_entry = new_map_button_options.row(align=True).box()
 
-        #           (C) City Name Field
-        city_name_field = city_name_entry.row(align=True)
-        city_name_field.prop(cvb.city_props, "city_name_prop", text="")
+            #           (B) City Name
+            city_name_field = city_name_entry.row(align=True)
+            city_name_field.prop(cvb.city_props, "city_name_prop", text="")
 
-        #           (D) "+" button
-        city_name_plus_button = city_name_field.split()
-        city_name_plus_button.operator("cvb.new_sketch_button", text="", icon='ADD')
+            #           (C) Sketch Generate ("+" button)
+            city_name_plus_button = city_name_field.split()
+            city_name_plus_button.operator("cvb.new_sketch_button", text="", icon='ADD')
 
-        #       (E) Sketch Name Dropdown
-        # Current programmatic control is limited so deconstruct the dropdown
-        sketch_name_entry = new_map_button_options.row(align=True)
-        sketch_name_field = sketch_name_entry.row(align=True)  # The sketch name
-        sketch_name_field.prop(cvb.city_props, "sketch_name_prop", text="", emboss=True)
+            #       City Name Options
+            city_name_options = new_map_button_options.box()
 
-        sketch_name_dropdown = sketch_name_field  # The sketch names dropdown
-        sketch_name_dropdown.enabled = True  # There will always be something in the list
-        sketch_name_dropdown.prop(
-            cvb.city_props,
-            "sketch_name_enum_prop",
-            text="",
-            icon_only=True,
-            icon='MESH_GRID')
+            #           city Name Entry Row
+            tile_seed_entry = city_name_options.row(align=True)
 
-        #       (F) Seed
-        # seed = cvb_prefs(context).cvb_seed
-        seed_stepper = new_map_button_options.row(align=True)
-        seed_stepper.prop(cvb, "seed_prop", text="Seed")
+            #               (D) Seed
+            seed_stepper = tile_seed_entry.split()
+            seed_stepper.prop(cvb, "seed_prop", text="Seed")
 
-        #       (G) Map Style Drop Down
-        map_style_dropdown = new_map_button_options.row(align=True)
-        map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
+            #           (E) City Style
+            map_style_dropdown = city_name_options.row(align=True)
+            map_style_dropdown.prop(cvb, "sketch_style_prop", text="Style")
 
-        #       (H) Map X,Y
-        sketch_x_y = new_map_button_options.row(align=True)
-        if cvb.using_tile_id_prop:
-            sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="X")
-            sketch_x_y.label(text="", icon='LINKED')
-            sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="Y")
-        else:
-            sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
-            sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
+            #           (F) Tile Size
+            sketch_x_y = city_name_options.row(align=True)
+            if cvb.using_tile_id_prop:
+                sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="X")
+                sketch_x_y.label(text="", icon='LINKED')
+                sketch_x_y.prop(cvb, "sketch_xy_linked_prop", text="Y")
+            else:
+                sketch_x_y.prop(cvb, "sketch_x_prop", text="X")
+                sketch_x_y.prop(cvb, "sketch_y_prop", text="Y")
 
         cvb.city_props.refresh_sketch_name(cvb)
 
@@ -345,33 +308,73 @@ class CVB_PT_Main(Panel):
         #       (I) Hide sketch
         hide_sketch_checkbox = hide_scale_row
 
-        hide_sketch_checkbox.enabled = are_sketches_in_list
+        are_enabled = are_sketches_in_list and not cvb.city_props.is_get_sketch_name_pending()
+
+        hide_sketch_checkbox.enabled = are_enabled
         hide_sketch_checkbox.prop(cvb, "sketch_visible_prop", text="Show Sketch?")
 
         #       (J) Scale sketch
         scale_sketch_checkbox = hide_scale_row
 
-        scale_sketch_checkbox.enabled = are_sketches_in_list
+        scale_sketch_checkbox.enabled = are_enabled
         scale_sketch_checkbox.prop(cvb, "sketch_minimized_prop", text="Mini?")
 
-        #       (K) Tile Id
-        tile_id_box = layout.row(align=True).box()
+    def draw_sketch_select(self, context, layout):
+        # pylint: disable=too-many-locals
+        """Draw the sketch dropdown select and tile id select"""
 
-        tile_id_row = tile_id_box.row(align=True)
+        cvb = context.scene.CVB
 
-        render_farm_checkbox = tile_id_row.column()
-        render_farm_checkbox.prop(cvb, "using_tile_id_prop", text="Multi tile?")
+        sketch_select = layout
 
-        if cvb.using_tile_id_prop:
-            tile_position = tile_id_row.column()
-            tile_position.enabled = False
-            tile_position.prop(cvb, "tile_position_prop", text="")
+        #       Sketch select
+        sketch_select_box = sketch_select.row(align=True).box()
 
-        if cvb.using_tile_id_prop:
-            tile_id_stepper = tile_id_box.row(align=True)
-            tile_id_stepper.prop(cvb, "tile_id_prop", text="Tile #")
+        #       (A) Sketch Name Dropdown
+        # Current programmatic control is limited so deconstruct the dropdown
+        # sketch_name_entry = sketch_select_box.row(align=True)
+        sketch_name_field = sketch_select_box.row(align=True)  # The sketch name
+        sketch_name_field.prop(cvb.city_props, "sketch_name_prop", text="", emboss=True)
 
+        sketch_name_dropdown = sketch_name_field  # The sketch names dropdown
+        sketch_name_dropdown.enabled = True  # There will always be something in the list
+        sketch_name_dropdown.prop(
+            cvb.city_props,
+            "sketch_name_enum_prop",
+            text="",
+            icon_only=True,
+            icon='MESH_GRID')
 
+        cvb.city_props.refresh_sketch_name(cvb)
+
+    def draw_tile_select(self, context, layout):
+        # pylint: disable=too-many-locals
+        """Draw the multi-tile toggle and optional tile id select"""
+
+        cvb = context.scene.CVB
+
+        sketch_is_pending = cvb.city_props.is_get_sketch_name_pending()
+
+        if sketch_is_pending or cvb.using_tile_id_prop:
+            tile_select = layout
+
+            tile_id_box = tile_select.row(align=True).box()
+            tile_id_row = tile_id_box.row(align=True)
+
+            # (G) Multi-tile Toggle
+            tile_id_row.prop(cvb, "using_tile_id_prop", text="Multi tile?")
+
+            # (H) Tile Id
+            if cvb.using_tile_id_prop:
+                tile_position = tile_id_row.column()
+                tile_position.enabled = False
+                tile_position.prop(cvb, "tile_position_prop", text="")
+
+            if cvb.using_tile_id_prop:
+                tile_id_stepper = tile_id_box.row(align=True)
+                tile_id_stepper.prop(cvb, "tile_id_prop", text="Tile #")
+
+        # cvb.city_props.refresh_sketch_name(cvb)
 
     def draw_city_sketch_button(self, context, layout):
         """Draw the Sketch Edit Button"""
@@ -455,7 +458,6 @@ class CVB_OT_GenCityButton(Operator):
         bpy.ops.mesh.primitive_cube_add()
 
         return {"FINISHED"}
-
 
 class CVB_OT_SketchEditButton(Operator):
     # pylint: disable=invalid-name

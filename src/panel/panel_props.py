@@ -25,6 +25,7 @@ from ..utils.collection_utils import viewlayer_collections, collection_sibling_n
 from ..utils.object_utils import object_get, object_get_or_add_empty, object_parent_all
 from ..utils.fass_grid import fassGrid
 
+from ..addon.preferences import cvb_icon, cvb_prefs
 
 
 def _mini_factor(t, n):
@@ -69,13 +70,17 @@ class CVB_PanelProperties(PropertyGroup):
         is_full = True
 
         cvb = bpy.context.scene.CVB
-        sketch_name = cvb.city_props.sketch_name_prop
+        sketch_name = cvb.city_props.get_sketch_name() if \
+              (not len(cvb.import_name_prop) > 0) and \
+              (not cvb.city_props.is_get_sketch_name_pending()) \
+            else ""
 
-        # Get the empty
-        transform_object = object_get("/CVB/{0}/{0} Transform".format(sketch_name))
+        if sketch_name:
+            # Get the empty
+            transform_object = object_get("/CVB/{0}/{0} Transform".format(sketch_name))
 
-        if transform_object and hasattr(transform_object, "scale") and transform_object.scale:
-            is_full = isclose(1.0, transform_object.scale[0], abs_tol=0.0001)
+            if transform_object and hasattr(transform_object, "scale") and transform_object.scale:
+                is_full = isclose(1.0, transform_object.scale[0], abs_tol=0.0001)
 
         return not is_full
 
@@ -92,8 +97,10 @@ class CVB_PanelProperties(PropertyGroup):
 
         cvb = bpy.context.scene.CVB
 
-        sketch_name = cvb.city_props.sketch_name_prop if not \
-            len(cvb.import_name_prop) > 0 else ""
+        sketch_name = cvb.city_props.get_sketch_name() if \
+              (not len(cvb.import_name_prop) > 0) and \
+              (not cvb.city_props.is_get_sketch_name_pending()) \
+            else ""
 
         if not sketch_name:
             return
@@ -180,8 +187,10 @@ class CVB_PanelProperties(PropertyGroup):
         """Turns the visibility of the sketch off or on"""
         cvb = bpy.context.scene.CVB
 
-        sketch_name = cvb.city_props.sketch_name_prop if not \
-            len(cvb.import_name_prop) > 0 else ""
+        sketch_name = cvb.city_props.get_sketch_name() if \
+              (not len(cvb.import_name_prop) > 0) and \
+              (not cvb.city_props.is_get_sketch_name_pending()) \
+            else ""
 
         if sketch_name:
             scene = viewlayer_collections("/CVB/{0}/Sketch ~ {0}".format(sketch_name))
