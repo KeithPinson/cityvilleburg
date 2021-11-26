@@ -15,6 +15,7 @@ from bpy.types import Panel, Operator, WorkSpaceTool
 from ..utils.collection_utils import collection_add
 from ..utils.object_utils import\
     object_add, object_get_or_add_empty, object_parent_all, object_make_active
+from . import terrain_object
 
 
 def terrain_outliner(context):
@@ -37,11 +38,15 @@ def terrain_outliner(context):
     subdivision_per_meter = 8
 
     # Collection
-    sketch_path = "/CVB/Terrain"
+    sketch_path = "/CVB/Region Terrain"
     collection_add(sketch_path)
 
     # Sketch Object
-    sketch_name = "Region_Map"
+    map_name = "Region Terrain Map"
+    object_add(sketch_path, map_name, terrain_object.RegionTerrainMap(map_name, size, size).obj)
+
+    # Transform Empty
+    sketch_name = "Region Terrain Transform"
     object_add(sketch_path, sketch_name, None)
 
 
