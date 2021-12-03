@@ -12,9 +12,9 @@
 
 import bpy
 from bpy.types import Panel, Operator, WorkSpaceTool
-from ..utils.collection_utils import collection_add
+from ..utils.collection_utils import collection_add, collection_activate
 from ..utils.object_utils import\
-    object_add, object_get_or_add_empty, object_parent_all, object_make_active
+    object_add, object_add_material, object_get_or_add_empty, object_parent_all, object_make_active
 from . import terrain_object
 
 
@@ -43,7 +43,14 @@ def terrain_outliner(context):
 
     # Sketch Object
     map_name = "Region Terrain Map"
-    object_add(sketch_path, map_name, terrain_object.RegionTerrainMap(map_name, size, size).obj)
+    terrain_map = terrain_object.RegionTerrainMap(map_name, size, size).obj
+    ob = object_add(sketch_path, map_name, terrain_map)
+
+    material_name = "Terrain Material"
+    green_color = (0.12, 0.30, 0.08, 1.0)
+    metallic = 0.0
+    roughness = 0.4
+    mat = object_add_material(ob, material_name, green_color, metallic, roughness)
 
     # Transform Empty
     sketch_name = "Region Terrain Transform"
@@ -60,14 +67,19 @@ def build_terrain_edit_rig(context):
         cvb.using_tile_id_prop else (cvb.sketch_x_prop, cvb.sketch_y_prop)
 
     sketchname = cvb.city_props.get_sketch_name()
-    print(sketchname)
 
-    print("build_terrain_edit_rig()")
+    # Show the terrain and hide the city sketch
+    collection_activate("Region Terrain", True)
+    collection_activate(cvb.city_props.get_sketch_name(), False)
 
 
 def teardown_terrain_edit_rig(context):
 
-    print("teardown_terrain_edit_rig()")
+    cvb = context.scene.CVB
+
+    # Make visible the city sketch
+    collection_activate(cvb.city_props.get_sketch_name(), True)
+    collection_activate("Region Terrain", False)
 
 
 class CVB_OT_TerrainEdit(Operator):

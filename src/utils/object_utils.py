@@ -30,15 +30,43 @@ from .collection_utils import collection_tail, collection_objects, path_object
 
 def object_add(collection_path, object_name, blender_object):
     """Add the object to the collections"""
-    added_object = None
-
-    added_object = bpy.data.objects.new(object_name, blender_object)
+    added_object = bpy.data.objects.get(object_name)
 
     if added_object:
-        coll = collection_tail(collection_path)
-        coll.objects.link(added_object)
+        print("Object already added:", object_name)
+        # if obj and obj.type == 'MESH':
+        #     bpy.context.view_layer.objects.active = obj
+        #     bpy.context.view_layer.objects.active.select_set(True)
+
+    else:
+        added_object = bpy.data.objects.new(object_name, blender_object)
+
+        if added_object:
+            coll = collection_tail(collection_path)
+            coll.objects.link(added_object)
 
     return added_object
+
+
+def object_add_material(blender_object, material_name, material_color, metallic, roughness):
+    """Add a material if it is not found with viewport color, metallic, and roughness"""
+    mat = bpy.data.materials.get(material_name)
+
+    if mat is None:
+        mat = bpy.data.materials.new(name=material_name)
+
+    if mat is not None:
+        mat.diffuse_color = material_color
+        mat.metallic = metallic
+        mat.roughness = roughness
+
+        if blender_object.data.materials:
+            # Overwrite first material
+            blender_object.data.materials[0] = mat
+        else:
+            blender_object.data.materials.append(mat)
+
+    return mat
 
 
 def object_get(object_path_and_name):

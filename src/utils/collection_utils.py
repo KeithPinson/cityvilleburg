@@ -63,6 +63,17 @@ def is_path_terminated(path_string):
     return True if re.match(r".+[/\\]$", path_string) else False
 
 
+def collection_activate(path_string, turn_on: bool):
+
+    try:
+        cvb_col = bpy.context.view_layer.layer_collection.children["CVB"]
+    except KeyError:
+        cvb_col = None
+
+    if cvb_col:
+        cvb_col.children[path_string].exclude = not turn_on
+
+
 def collection_children(path_string):
     """Return the list of children at the path location,
     make no distinction between failure and a path with no children"""
